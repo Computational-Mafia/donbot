@@ -1,4 +1,4 @@
-### Donbot
+# Donbot
 The donbot module is a simple module w/ a class that makes it super easy to automate interactions with mafiascum.net.
 Create an instance of the Donbot class with your username and password 
 (and potentially other parameters), and you'll be able to:
