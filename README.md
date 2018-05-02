@@ -20,6 +20,6 @@ Create an instance of the Donbot class with your username and password
 
 **Please** don't use these functions haphazardly, especially those that make posts or send PMs, as misuse thereof can be against Site Rules, get you banned, and most importantly cause trouble for a lot of decent people.
 
-[Tutorial / Documentation](donbot/donbotdemo.ipynb)
-[Details of Module](donbot/donbot.ipynb)
-[Module](donbot/donbot.py)
+[Tutorial / Documentation](donbot/donbotdemo.ipynb)  
+[Details of Module](donbot/donbot.ipynb)  
+[Module](donbot/donbot.py)  
