@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Donbot
-# A simple module for automating interactions with mafiascum.net.
+# The donbot module is a simple module w/ a class that makes it super easy to automate interactions with mafiascum.net.
 # Create an instance of the Donbot class with your username and password 
 # (and potentially other parameters), and you'll be able to:
 # - Collect a range of posts from a thread
@@ -10,8 +10,11 @@
 # - Send pms to a user with a specified subject and body
 # - Collect the number of posts in a specified thread
 # - Collect id matching a specified scummer's username
+# - And, eventually, more!
 # 
-# More functionality will be added in the future according to project demands.
+# `donbot.py` is produced by converting the front-facing notebook `donbot.ipynb` using the jupyter command `jupyter nbconvert --to script donbot.ipynb`. Consult `donbotdemo.ipynb` for a tutorial on how to use the module.
+# 
+# **Please** don't use these functions haphazardly, especially those that make posts or send pms, as misuse thereof can be against Site Rules, get you banned, and most importantly cause trouble for a lot of decent people.
 
 # ## Setup
 
@@ -20,11 +23,12 @@
 # In[1]:
 
 
-from datetime import datetime # to parse timestamps
-from math import ceil         # to get page# from post
-from lxml import html         # to help parse website content
-import requests               # for interacting with website
-import time                   # need delays before post requests
+from datetime import datetime as dt # to parse timestamps
+from datetime import timedelta # parsing hours/minutes
+from math import ceil          # to get page# from post
+from lxml import html          # to help parse website content
+import requests                # for interacting with website
+import time                    # need delays before post requests
 
 
 # ### Urls donbot will construct requests with
@@ -77,14 +81,18 @@ postformpath = "//input[@name='{}']/@value"
 # at userurl, path to link that has their userid
 userlinkpath = "//dt[@class='author']/a/@href"
 
+# at activityoverview page, path to cells of page's main table
+activitypath = "//table//table//div"
+
 
 # ### Other static variables used across instances
 
 # In[4]:
 
 
-# number of posts that appear on each thread page
-postsperpage = 25 
+postsperpage = 25 # number of posts per thread page
+poststamp = '%a %b %d, %Y %I:%M %p' # post timestamp structure
+#overviewstamp = '%b %d, %I:%M%p' # activity overview timestamps
 
 
 # ## The Donbot Class
@@ -94,17 +102,14 @@ postsperpage = 25
 
 class Donbot:
     
-    def __init__(self, username=None, password=None,
-                 thread=None, postdelay=1.5):
+    def __init__(self, username, password, thread=None, postdelay=1.5):
         self.postdelay = postdelay # seconds to wait before post requests
         self.thread = thread
         self.username = username
         self.session = requests.Session()
-        
-        if username and password:
-            self.session.post(loginurl, 
-                              {'username': username, 'password': password,
-                               'redirect': 'index.php', 'login': 'Login'})
+        self.session.post(loginurl, 
+                          {'username': username, 'password': password,
+                           'redirect': 'index.php', 'login': 'Login'})
         
     def getUserID(self, username):
         # Search for posts by user; userID is in link in first result.
@@ -121,6 +126,21 @@ class Donbot:
         page = self.session.get(thread).content
         numberOfPosts = html.fromstring(page).xpath(postcountpath)[0]
         return int(numberOfPosts[:numberOfPosts.find(' ')].strip())
+    
+    def getActivityOverview(self, thread=None):
+        thread = thread if thread else self.thread
+        if len(thread) == 0:
+            raise ValueError('No thread specified!')
+        page = self.session.get(thread+'&activity_overview=1').content
+        userinfo = []
+        for row in html.fromstring(page).xpath(activitypath)[1:]:
+            rowtext = row.xpath(".//text()")
+            userinfo.append({'user': rowtext[5],
+                             'firstpost': rowtext[8].strip(),
+                             'lastpost': rowtext[10].strip(),
+                             'sincelast': rowtext[12].strip(),
+                             'totalposts': rowtext[15]})
+        return userinfo
         
     def getPosts(self, thread=None, start=0, end=float('infinity')):
         thread = self.thread if not thread else thread
@@ -147,8 +167,7 @@ class Donbot:
                     # requires some postprocessing to turn into a datetime
                     stamp = post.xpath(datetimepath)[-1]
                     p['datetime'] = stamp[stamp.find('» ')+2:].strip()
-                    p['datetime'] = datetime.strptime(
-                        p['datetime'], '%a %b %d, %Y %I:%M %p')
+                    p['datetime'] = dt.strptime(p['datetime'], posttimestamp)
                     newposts.append(p)
         return newposts
         
