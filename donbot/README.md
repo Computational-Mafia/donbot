@@ -1,5 +1,5 @@
 
-# Donbot Readme / Tutorial / Demo / Documentation
+# Donbot
 The donbot module is a simple module w/ a class that makes it super easy to automate interactions with mafiascum.net.
 Create an instance of the Donbot class with your username and password 
 (and potentially other parameters), and you'll be able to:
@@ -12,10 +12,12 @@ Create an instance of the Donbot class with your username and password
 
 **Please** don't use these functions haphazardly, especially those that make posts or send PMs, as misuse thereof can be against Site Rules, get you banned, and most importantly cause trouble for a lot of decent people.
 
-Module Details: `donbot/donbot.ipynb`  
-Module: `donbot/donbot.py`
-
 This is a quick tutorial on how to use Donbot so that even Python beginners can quickly begin using it. Please let someone know if it's wrong or unclear, because it'll always be a work in progress.
+
+## File Organization
+Module: `donbot/donbot.py`  
+Module Details: `donbot/donbot.ipynb`  
+Tutorial iPython Notebook: `donbot/donbotdemo.ipynb`
 
 ## Starting a Donbot Instance
 Before we start, make sure you have the Python packages `lxml` and `requests`. They're pretty easy to get, I think; you probably only need to type "`pip install lxml`" and "`pip install requests`" into your command prompt. Check the websites for these packages for more details. I believe other dependencies of the donbot module come with Python.
