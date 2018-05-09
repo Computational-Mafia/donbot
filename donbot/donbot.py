@@ -29,6 +29,10 @@ from math import ceil          # to get page# from post
 from lxml import html          # to help parse website content
 import requests                # for interacting with website
 import time                    # need delays before post requests
+import gevent                  # async/concurrency
+from gevent import monkey
+# patches stdlib (including socket and ssl modules) to cooperate with other greenlets
+monkey.patch_all()
 
 
 # ### Urls donbot will construct requests with
@@ -201,20 +205,26 @@ class Donbot:
         if isinstance(sendto, str):
             sendto = [sendto]
 
-        # TODO: consider running requests asynchronously
-        # and chaining them one after another 
+        uids = [gevent.spawn(self.getUserID, user) for user in sendto]
+        pminfo = gevent.spawn(self.session.get, pmurl)
+
+        gevent.wait(uids)
+        gevent.wait([pminfo])
+
+        if(not pminfo.successful()):
+            raise Exception('Failed to get pm info')
+
         postdelay = postdelay if postdelay else self.postdelay
-        compose = html.fromstring(self.session.get(pmurl).content)
+        compose = html.fromstring(pminfo.value.content)
 
         form = {'username_list':'', 'subject':subject, 'addbbcode20':100,
                 'message':body, 'status_switch':0, 'post':'Submit',
                 'attach_sig':'on', 'disable_smilies':'on'}
-        for user in sendto:
-            form['address_list[u][{}]'.format(self.getUserID(user))] = 'to'
+        for user in uids:
+            form['address_list[u][{}]'.format(user.value)] = 'to'
 
         for name in ['lastclick', 'creation_time', 'form_token']:
             form[name] = compose.xpath(postformpath.format(name))[0]
 
         time.sleep(postdelay)
         self.session.post(pmurl, form)
-
