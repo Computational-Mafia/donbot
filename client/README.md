@@ -108,6 +108,8 @@ An index of all available Modbot functionality that can be selected from.
 ```python
 @app.route('/')
 def index():
+    # if user isn't logged in, send them to login
+    # otherwise return an index of available functions
     if not authenticated():
         return redirect(url_for('login'))
     return indexhtml.format(url_for('pagetopper'), url_for('logout'))
@@ -120,6 +122,8 @@ Collect or discard user information related to Modbot.
 ```python
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # if a POST request, try to store user and pass
+    # otherwise, return a form for these variables
     if request.method == 'POST':
         for each in ['username', 'password']:
             session[each] = request.form[each]
@@ -128,10 +132,12 @@ def login():
 
 @app.route('/logout')
 def logout():
+    # clear session and redirect to login
     session = {}
     return redirect(url_for('login'))
 
 def authenticated():
+    # True if user has logged in; False if they've logged out
     return ('username' in session and 'password' in session)
 ```
 
@@ -142,16 +148,24 @@ a bot that automatically stalks a thread for opportunities to pagetop it using t
 ```python
 @app.route('/pagetopper', methods=['GET', 'POST'])
 def pagetopper():
+    # if user isn't logged in, send them to login
     if not authenticated():
         return redirect(url_for('login'))
+    
+    # if a POST request, store key variables in session
     if request.method == 'POST':
         for each in ['thread', 'content', 'interval']:
             session['pagetopper-{}'.format(each)] = request.form[each]
+    
+    # if pagetopper vars not in session, return pagetopper form
     if not ('pagetopper-thread' in session
             and 'pagetopper-content' in session
             and 'pagetopper-interval' in session):
         return pagetopperformhtml.format(
             url_for('index'), url_for('logout'))
+    
+    # if pagetopper vars are in session, 
+    # check thread for opportunity to pagetop and do so if applicable
     thread = session['pagetopper-thread']
     interval = session['pagetopper-interval']
     content = session['pagetopper-content']
@@ -165,12 +179,16 @@ def pagetopper():
     if (current != ceil(update/postsPerPage) or update % 25 == 0):
         bot.makePost(content)
         current = ceil(bot.getNumberOfPosts()/postsPerPage)
+        
+    # return page reporting progress and including a countdown
+    # until this function will be automatically be requested again
     return pagetopperoperatinghtml.format(
         content, thread, interval, url_for('pagetopper_reset'),
         url_for('index'), url_for('logout'), url_for('pagetopper'))
 
-@app.route('/pagetopper_reset') # for resetting pagetopper parameters
+@app.route('/pagetopper_reset')
 def pagetopper_reset():
+    # remove from session all pagetopper parameters and redirect back
     for each in ['thread', 'content', 'interval']:
         session.pop('pagetopper-{}'.format(each))
     return redirect(url_for('pagetopper'))
