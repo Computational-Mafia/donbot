@@ -100,7 +100,7 @@ poststamp = '%a %b %d, %Y %I:%M %p' # post timestamp structure
 # In[5]:
 
 
-class Donbot:
+class Donbot(object):
     
     def __init__(self, username, password, thread=None, postdelay=1.5):
         self.postdelay = postdelay # seconds to wait before post requests
