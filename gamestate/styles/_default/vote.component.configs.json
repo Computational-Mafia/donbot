@@ -1,0 +1,5 @@
+{
+	"vote_power_header":" (",
+	"vote_power_footer":")",
+	"min_power_to_show":2
+}

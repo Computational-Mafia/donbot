@@ -1,0 +1,13 @@
+{title}
+
+{flavor}
+
+{voters_list}
+
+{not_voting_list}
+
+With {active_voters} alive, it takes {threshold} to lynch.
+
+{deadline}
+
+{past_vote_counts}
