@@ -175,6 +175,7 @@ bot.makePost(content, thread=targetthread)
 subject = 'Re: Artfully Selected Movement Sequences of the Title Fairy'
 body = 'you are the worst title fairy ever'
 sendto = 'Psyche'
+sendto = ['Psyche', 'AnotherUser'] # can also be a list of strings if sending to multiple users
 
 bot.sendPM(subject, body, sendto)
 ```

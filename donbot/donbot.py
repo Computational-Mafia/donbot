@@ -31,13 +31,14 @@ import requests                # for interacting with website
 import time                    # need delays before post requests
 import gevent                  # async/concurrency
 from gevent import monkey
-# patches stdlib (including socket and ssl modules) to cooperate with other greenlets
+
+# patches stdlib to cooperate w/ other greenlets
 monkey.patch_all()
 
 
 # ### Urls donbot will construct requests with
 
-# In[2]:
+# In[ ]:
 
 
 # generic site url; will start other urls
@@ -96,12 +97,11 @@ activitypath = "//table//table//div"
 
 postsperpage = 25 # number of posts per thread page
 poststamp = '%a %b %d, %Y %I:%M %p' # post timestamp structure
-#overviewstamp = '%b %d, %I:%M%p' # activity overview timestamps
 
 
 # ## The Donbot Class
 
-# In[5]:
+# In[6]:
 
 
 class Donbot(object):
@@ -201,17 +201,16 @@ class Donbot(object):
         # a third request gets userid matching user
         if len(sendto) == 0:
             raise ValueError('sendTo field missing')
-
+        
         if isinstance(sendto, str):
             sendto = [sendto]
 
+        # asynchronous collect relevant userIDs and session pm info
         uids = [gevent.spawn(self.getUserID, user) for user in sendto]
         pminfo = gevent.spawn(self.session.get, pmurl)
-
         gevent.wait(uids)
         gevent.wait([pminfo])
-
-        if(not pminfo.successful()):
+        if not pminfo.successful():
             raise Exception('Failed to get pm info')
 
         postdelay = postdelay if postdelay else self.postdelay
@@ -228,3 +227,4 @@ class Donbot(object):
 
         time.sleep(postdelay)
         self.session.post(pmurl, form)
+
