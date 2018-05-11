@@ -1,0 +1,50 @@
+{
+	"name":"Default Setup Template",
+	"type":"Template",
+	"mods":[],
+	"players":[],
+	"phase_types":
+	[
+		{
+			"name":"Pregame",
+			"elections":[],
+			"modifiers":
+			{
+				"use_plain_name":true
+			}
+		},
+		{
+			"name":"Day",
+			"elections":["Lynch"],
+			"modifiers":{}
+		},
+		{
+			"name":"Night",
+			"elections":[],
+			"modifiers":{}
+		},
+		{
+			"name":"Endgame",
+			"elections":[],
+			"modifiers":
+			{
+				"use_plain_name":true
+			}
+		}
+	],
+	"election_types":
+	[
+		{
+			"name":"Lynch",
+			"modifiers":
+			{
+				"include_all_players":true,
+				"end_on_phase_change":true
+			}
+		}
+	],
+	"modifiers":
+	{
+		"phase_progression":["Day", "Night"]
+	}
+}

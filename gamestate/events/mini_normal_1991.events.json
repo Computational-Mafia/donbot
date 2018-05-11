@@ -1,0 +1,24 @@
+[
+	{
+		"type":"vote",
+		"post":4,
+		"voter":"havingfitz",
+		"votee":"Mumble"
+	},
+	{
+		"type":"vote",
+		"post":6,
+		"voter":"numberQ",
+		"votee":"Mumble"
+	},
+	{
+		"type":"vote",
+		"post":8,
+		"voter":"Papa Zito",
+		"votee":"Havo"
+	},
+	{
+		"type":"change_phase",
+		"post":2,
+	}
+]

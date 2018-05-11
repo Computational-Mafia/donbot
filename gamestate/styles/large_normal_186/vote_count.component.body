@@ -1,0 +1,9 @@
+Votecount #{vote_count_label}
+
+{voters_list}
+
+{not_voting_list}
+
+With [b]{active_voters}[/b] alive it's [b]{threshold}[/b] to lynch.
+
+Night falls in {deadline}.

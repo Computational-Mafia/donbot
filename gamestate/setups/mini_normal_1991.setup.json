@@ -1,0 +1,131 @@
+{
+	"name":"Mini 1991: Taking Justice Into Our Own Hands",
+	"type":"Large Normal",
+	"mods":[
+		{
+			"name": "Beefster",
+			"aliases":[]
+		}
+	],
+	"players":
+	[
+		{
+			"name":"numberQ",
+			"aliases":["Goofy Nickname"],
+			"role":"Mafia Goon",
+			"alignment":"Mafia",
+			"modifiers":[]
+		},
+		{
+			"name":"Lexa",
+			"aliases":[],
+			"role":"Mafia Goon",
+			"alignment":"Mafia"
+		},
+		{
+			"name":"rb",
+			"aliases":[],
+			"role":"Mafia Odd-Night Rolecop",
+			"alignment":"Mafia"
+		},
+		{
+			"name":"havingfitz",
+			"aliases":[],
+			"role":"Jack of all Trades (Track/Watch/Kill)",
+			"alignment":"Town"
+		},
+		{
+			"name":"Luca Blight",
+			"aliases":[],
+			"role":"Jack of all Trades (Track/Watch/Roleblock/Gunsmith)",
+			"alignment":"Town"
+		},
+		{
+			"name":"Mumble",
+			"aliases":[],
+			"role":"Doctor",
+			"alignment":"Town"
+		},
+		{
+			"name":"Havo",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		},
+		{
+			"name":"Guy_Named_Riggs",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		},
+		{
+			"name":"Awoo",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		},
+		{
+			"name":"Papa Zito",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		},
+		{
+			"name":"Cedrick",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		},
+		{
+			"name":"northsidegal",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		},
+		{
+			"name":"Alexcellent",
+			"aliases":[],
+			"role":"Vanilla Townie",
+			"alignment":"Town"
+		}
+	],
+	"phase_types":
+	[
+		{
+			"name":"Morning",
+			"elections":["Lynch"],
+			"modifiers":
+				{
+					"has_deadline":false				
+				}
+		},
+		{
+			"name":"Afternoon",
+			"elections":[["Lynch", "Midday Vote"]],
+			"modifiers":
+				{
+					"some_modifier":true
+				}
+		},
+		{
+			"name":"Evening",
+			"elections":["Lynch"]
+		},
+		{
+			"name":"Night"
+		}
+	],
+	"election_types":
+	[
+		{
+			"name":"Midday Vote"
+		}
+	],
+	"modifiers":
+	{
+		"is_game":true,
+		"other_modifier":true,
+		"third_modifier":5,
+		"phase_progression":["Morning", "Afternoon", "Evening", "Night"]
+	}
+}
