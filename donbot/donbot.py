@@ -195,12 +195,23 @@ class Donbot:
     def sendPM(self, subject, body, sendto, postdelay=None):
         # one request to get form info for pm, and another to send it
         # a third request gets userid matching user
+        if len(sendto) == 0:
+            raise ValueError('sendTo field missing')
+
+        if isinstance(sendto, str):
+            sendto = [sendto]
+
+        # TODO: consider running requests asynchronously
+        # and chaining them one after another 
         postdelay = postdelay if postdelay else self.postdelay
         compose = html.fromstring(self.session.get(pmurl).content)
+
         form = {'username_list':'', 'subject':subject, 'addbbcode20':100,
                 'message':body, 'status_switch':0, 'post':'Submit',
-                'attach_sig':'on', 'disable_smilies':'on',
-                'address_list[u][{}]'.format(self.getUserID(sendto)):'to'}
+                'attach_sig':'on', 'disable_smilies':'on'}
+        for user in sendto:
+            form['address_list[u][{}]'.format(self.getUserID(user))] = 'to'
+
         for name in ['lastclick', 'creation_time', 'form_token']:
             form[name] = compose.xpath(postformpath.format(name))[0]
 
