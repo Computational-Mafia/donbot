@@ -1,6 +1,5 @@
-
 # Votecounter
-Includes Psyche's version of a VoteExtracter class for extracting votes from posts, and a set of helper functions and variables used to pull that off. These are discussed in detail at their location in the notebook.
+`Votecounter.ipynb/.py` ncludes Psyche's version of a VoteExtracter class for extracting votes from posts, and a set of helper functions and variables used to pull that off. These are discussed in detail at their location in the notebook.
 
 Rather than being very strict about what counts as a vote (ie looking for proper vote formatting and exact target naming), this function is intended to work like human moderators do, or at least have over the D1s of ~300 Mini Normal Games studied to produce the function. The VoteExtractor class has been found to accurately predict which player a moderator assigned a lynch to across nearly all of these studied games - all without relying on any explicit database of aliases.
 
@@ -8,7 +7,9 @@ If aliases are *totally* necessary to understand the target of a vote (for examp
 
 `votecounter.py` is produced by converting the front-facing notebook `votecounter.ipynb` using the jupyter command `jupyter nbconvert --to script votecounter.ipynb`.
 
-This notebook/script was developed in work described in `votecounterdev.ipnyb` based on Mini Normal Archive data listed in `archive.txt`. The associated archive of posts associated with the listed games is too large to be uploaded to GitHub, but may be obtainable by scraping the data or contacting Psyche.
+As some work may be left to be done on this subproject, a development folder is included with the code used to develop this votecounter. This notebook/script was developed in work described in `votecounterdev.ipnyb` based on Mini Normal Archive data listed in `archive.txt`. The associated archive of posts associated with the listed games is too large to be uploaded to GitHub, but may be obtainable by scraping the data or contacting Psyche.
+
+Additional classes included in the development subdirectory are described in `VoteCount.ipynb` and `VotecounterTest.ipynb`; though they currently work much more slowly than the testing code described in `development/votecounterdev.ipynb`, these notebooks support some testing of votecounters that have a certain API.
 
 ## Setup
 
