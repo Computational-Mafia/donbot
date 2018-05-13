@@ -20,25 +20,20 @@
 
 # ### Dependencies
 
-# In[1]:
+# In[2]:
 
 
 from datetime import datetime as dt # to parse timestamps
 from datetime import timedelta # parsing hours/minutes
-from math import ceil          # to get page# from post
+from math import floor          # to get page# from post
 from lxml import html          # to help parse website content
 import requests                # for interacting with website
 import time                    # need delays before post requests
-import gevent                  # async/concurrency
-from gevent import monkey
-
-# patches stdlib to cooperate w/ other greenlets
-monkey.patch_all()
 
 
 # ### Urls donbot will construct requests with
 
-# In[ ]:
+# In[15]:
 
 
 # generic site url; will start other urls
@@ -59,7 +54,7 @@ pmurl = siteurl + 'ucp.php?i=pm&mode=compose'
 
 # ### Paths to elements donbot will grab info from
 
-# In[3]:
+# In[16]:
 
 
 # number of posts in thread assoc'd w/ page
@@ -92,7 +87,7 @@ activitypath = "//table//table//div"
 
 # ### Other static variables used across instances
 
-# In[4]:
+# In[17]:
 
 
 postsperpage = 25 # number of posts per thread page
@@ -101,7 +96,7 @@ poststamp = '%a %b %d, %Y %I:%M %p' # post timestamp structure
 
 # ## The Donbot Class
 
-# In[6]:
+# In[37]:
 
 
 class Donbot(object):
@@ -146,32 +141,35 @@ class Donbot(object):
                              'totalposts': rowtext[15]})
         return userinfo
         
-    def getPosts(self, thread=None, start=0, end=float('infinity')):
+    def getPosts(self, thread=None, start=0, end=float('infinity'), loggedin=True):
         thread = self.thread if not thread else thread
         if len(thread) == 0:
             raise ValueError('No thread specified!')
             
         # check end or # of posts in thread to find pages we need to examine
-        startpage = ceil(start/postsperpage)
-        endpage = (ceil(end/postsperpage) if end != float('infinity')
-                   else ceil(self.getNumberOfPosts(thread)/postsperpage))
+        startpage = floor(start/postsperpage)
+        endpage = (floor(end/postsperpage) if end != float('infinity')
+                   else floor(self.getNumberOfPosts(thread)/postsperpage))
         
         # collect on each page key content from posts after currentpost
         newposts = []
-        for i in range(startpage*25, endpage*25, 25):
-            page = self.session.get(thread+'&start='+str(i)).content
+        for i in range(startpage*25, (endpage+1)*25, 25):
+            if loggedin:
+                page = self.session.get(thread+'&start='+str(i)).content
+            else:
+                page = requests.get(thread+'&start='+str(i)).content
             for post in html.fromstring(page).xpath(postspath):
                 p = {}
                 p['number'] = int(post.xpath(numberpath)[0][1:])
                 if p['number'] >= start and p['number'] <= end:
                     p['user'] = post.xpath(userpath)[0]
                     p['content'] = html.tostring(post.xpath(contentpath)[0])
-                    p['content'] = p['content'].decode('UTF-8')
+                    p['content'] = p['content'].decode('UTF-8').strip()[21:-6]
 
                     # requires some postprocessing to turn into a datetime
                     stamp = post.xpath(datetimepath)[-1]
                     p['datetime'] = stamp[stamp.find('» ')+2:].strip()
-                    p['datetime'] = dt.strptime(p['datetime'], posttimestamp)
+                    p['datetime'] = dt.strptime(p['datetime'], poststamp)
                     newposts.append(p)
         return newposts
         
@@ -199,29 +197,18 @@ class Donbot(object):
     def sendPM(self, subject, body, sendto, postdelay=None):
         # one request to get form info for pm, and another to send it
         # a third request gets userid matching user
-        if len(sendto) == 0:
-            raise ValueError('sendTo field missing')
-        
-        if isinstance(sendto, str):
-            sendto = [sendto]
-
-        # asynchronous collect relevant userIDs and session pm info
-        uids = [gevent.spawn(self.getUserID, user) for user in sendto]
-        pminfo = gevent.spawn(self.session.get, pmurl)
-        gevent.wait(uids)
-        gevent.wait([pminfo])
-        if not pminfo.successful():
-            raise Exception('Failed to get pm info')
-
+        sendto = [sendto] if isinstance(sendto, str) else sendto
+        uids = [self.getUserID(user) for user in sendto]
         postdelay = postdelay if postdelay else self.postdelay
-        compose = html.fromstring(pminfo.value.content)
+        compose = html.fromstring(self.session.get(pmurl).content)
 
-        form = {'username_list':'', 'subject':subject, 'addbbcode20':100,
-                'message':body, 'status_switch':0, 'post':'Submit',
-                'attach_sig':'on', 'disable_smilies':'on'}
+        form = {'username_list':'', 'subject':subject, 'message':body,
+                'addbbcode20':100, 'message':body, 'status_switch':0, 
+                'post':'Submit', 'attach_sig':'on',
+                'disable_smilies':'on'}
         for user in uids:
             form['address_list[u][{}]'.format(user.value)] = 'to'
-
+            
         for name in ['lastclick', 'creation_time', 'form_token']:
             form[name] = compose.xpath(postformpath.format(name))[0]
 
