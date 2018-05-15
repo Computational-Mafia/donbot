@@ -16,13 +16,13 @@
 
 # ### Dependencies
 
-# In[2]:
+# In[32]:
 
 
-from scrapy.selector import Selector # to help parse website content
-import editdistance as ed  # to detect slight misspellings
-import enchant             # spellchecker to help identify english words
-import re                  # unfortunately reliant on regular expressions
+from lxml import html     # to help parse website content
+import editdistance as ed # to detect slight misspellings
+import enchant            # spellchecker to help identify english words
+import re                 # sadly we rely on regular expressions
 
 
 # In[3]:
@@ -38,6 +38,15 @@ dUS = enchant.Dict("en_US")
 regall = re.compile('[^a-zA-Z]') # any character that IS NOT a-z OR A-Z
 regup = re.compile('[^A-Z]') # any character that IS NOT A-Z
 
+# paths useful for finding votes in posts
+votepath1 = '/html/body/p/span[@class="{}"]//text()'
+votepath2 = '/html/body/span[@class="{}"]//text()'
+votepath3 = '/html/body/p/span/span[@class="{}"]//text()'
+votepath4 = '/html/body/span/span[@class="{}"]//text()'
+votepath5 = '/html/body/p/span[@class="{}"]'
+votepath6 = '/html/body/span[@class="{}"]'
+subpath = 'span//text()'
+
 
 # ## Helper Functions
 
@@ -51,7 +60,7 @@ regup = re.compile('[^A-Z]') # any character that IS NOT A-Z
 
 # returns ways the string can be split into english words or letters, 
 # ordered from least to most number of divisions
-def _englishdivides(playername):
+def englishdivides(playername):
     string = regall.sub('', playername) # filter non-letters
     passes = [[['']]]
     fulldivides = []
@@ -76,86 +85,78 @@ def _englishdivides(playername):
 # 
 # This function handles all these issues in a way that mimics how actual moderators have almost always behaved across the 300 Mini Normal Games studied to develop this module.
 
-# In[6]:
+# In[37]:
 
 
 # locates/returns the votes in a post w/o identifying the player voted
 def findVotes(post):
     "Returns list of votes present in the posts content"
-    sel = Selector(text=post['content'])
+    sel = html.fromstring('<html><body>' + post['content'] + '</body></html>')
     
     # pull out all relevant tags
-    boldtags = (
-        [each.extract() for each in 
-         sel.xpath('/html/body/p/span[@class="noboldsig"]//text()')] +
-        [each.extract() for each in 
-         sel.xpath('/html/body/span[@class="noboldsig"]//text()')] +
-        [each.extract() for each in 
-         sel.xpath(
-             '/html/body/p/span/span[@class="noboldsig"]//text()')] +
-        [each.extract() for each in 
-         sel.xpath('/html/body/span/span[@class="noboldsig"]//text()')] +
-        [''.join(each.xpath('span//text()').extract()) for each in
-         sel.xpath('/html/body/p/span[@class="noboldsig"]')] +
-        [''.join(each.xpath('span//text()').extract()) for each in
-         sel.xpath('/html/body/span[@class="noboldsig"]')])
+    tagclass = 'noboldsig'
+    boldtags = (sel.xpath(votepath1.format(tagclass)) +
+                sel.xpath(votepath2.format(tagclass)) +
+                sel.xpath(votepath3.format(tagclass)) +
+                sel.xpath(votepath4.format(tagclass)) +
+                [''.join(each.xpath(subpath)) for each 
+                 in sel.xpath(votepath5.format(tagclass))] +
+                [''.join(each.xpath(subpath)) for each 
+                 in sel.xpath(votepath6.format(tagclass))]
+               )
+    tagclass = 'bbvote'
+    votetags = (sel.xpath(votepath1.format(tagclass)) +
+                sel.xpath(votepath2.format(tagclass)) +
+                sel.xpath(votepath3.format(tagclass)) +
+                sel.xpath(votepath4.format(tagclass)) +
+                [''.join(each.xpath(subpath)) for each 
+                 in sel.xpath(votepath5.format(tagclass))] +
+                [''.join(each.xpath(subpath)) for each 
+                 in sel.xpath(votepath6.format(tagclass))]
+               )
     
-    votetags = (
-        [each.extract() for each in 
-         sel.xpath('/html/body/p/span[@class="bbvote"]//text()')] +
-        [each.extract() for each in
-         sel.xpath('/html/body/span[@class="bbvote"]//text()')] + 
-        [each.extract() for each in
-         sel.xpath('/html/body/p/span/span[@class="bbvote"]//text()')] +
-        [each.extract() for each in
-         sel.xpath('/html/body/span/span[@class="bbvote"]//text()')] +
-        [''.join(each.xpath('span//text()').extract()) for each in
-         sel.xpath('/html/body/p/span[@class="bbvote"]')] +
-        [''.join(each.xpath('span//text()').extract()) for each in
-         sel.xpath('/html/body/span[@class="bbvote"]')])
-    
-    # first of all, though,
-    # we handle broken bold tags similarly 
+    # first of all, though, we handle broken bold tags similarly
     # after some preprocessing, so let's add those
-    for content in (sel.xpath('/html/body/text()').extract() +
-                    sel.xpath('/html/body/p/text()').extract()):
+    for content in (sel.xpath('/html/body/text()') +
+                    sel.xpath('/html/body/p/text()')):
         if content.count('[/b]') > 0:
-            tagline = content[:content.find(
-                '[/b]')].lstrip().rstrip() # up to broken tag
+            # up to broken tag
+            tagline = content[:content.find('[/b]')].lstrip().rstrip()
             boldtags.append(tagline)
         if content.count('[b]') > 0:
-            tagline = content[content.find(
-                '[b]')+3:].lstrip().rstrip() # starting at broken tag
+            # starting at broken tag
+            tagline = content[content.find('[b]')+3:].lstrip().rstrip()
             boldtags.append(tagline)
     
-    # we want votetags to have priority, so add them to the pool here
-    boldtags = boldtags + votetags 
+    #  we want votetags to have priority, so add them to the pool here
+    boldtags = boldtags + votetags
     boldtags = [b.rstrip().lstrip() for b in boldtags]
     
     # they need to have 'vote' or 'veot' early in their string
-    boldtags = [b for b in boldtags if b[:7].lower().count('vote')
-                + b[:7].lower().count('veot') > 0]
+    boldtags = [b for b in boldtags
+                if b[:7].lower().count('vote') + b[:7].lower().count('veot') > 0]
     
-    # rfind 'vote' and 'unvote' (and key mispellings) to locate vote
+    # rfind 'vote' and 'unvote' (and their key mispellings) to locate vote
     for i, v in enumerate(boldtags):
         voteloc = max(v.lower().rfind('vote'), v.lower().rfind('veot'))
-        unvoteloc = max(
-            v.lower().rfind('unvote'), v.lower().rfind('unveot'))
+        unvoteloc = max(v.lower().rfind('unvote'), v.lower().rfind('unveot'))
         
         # if position of unvote is position of vote - 2, 
         # then the last vote is an unvote
         if unvoteloc > -1 and unvoteloc == voteloc - 2:
-            boldtags[i] = 'UNVOTE'
+            boldtags[i] = 'not voting'
             
-        # otherwise vote is immediately after 'vote' text 
-        # and perhaps some other stuff that must be stripped away
+        # otherwise vote is immediately after 'vote' text and perhaps some crap
         else:
-            boldtags[i] = (
-                v[voteloc+4:].replace(': ', ' ').replace(
-                    ':', ' ').replace('\n', ' ').rstrip().lstrip())
+            boldtags[i] = v[voteloc+4:].replace(
+                ': ', ' ').replace(':', ' ').replace('\n', ' ').rstrip().lstrip()
 
     votes = boldtags
     return votes
+
+def includesVote(post):
+    """Returns whether a vote is present in the post's content or not"""
+    return len(findVotes(post)) > 0
 
 
 # ## The VoteExtracter Class
@@ -171,7 +172,7 @@ class VoteExtracter:
         self.playerabbrevs, self.players = {}, players
         self.lowplayers = {p.lower():p for p in players}
         for p in players:
-            self.playerabbrevs[p] =             ''.join([each[0] for each in _englishdivides(p)[0][1:]])
+            self.playerabbrevs[p] =             ''.join([each[0] for each in englishdivides(p)[0][1:]])
 
     def fromPost(self, post):
         """tries to identify vote's target from the post"""
@@ -288,7 +289,7 @@ class VoteExtracter:
             # 13 if any length>3 english-divided parts of a player's name
             # are a vote substring
             suboccurrences = [p for p in self.players
-                              if len([s for s in _englishdivides(p)[0]
+                              if len([s for s in englishdivides(p)[0]
                                       if (lowvote.count(s.lower())
                                           > 0 and len(s) > 3)]) > 0]
             if len(suboccurrences) == 1:
@@ -299,7 +300,7 @@ class VoteExtracter:
             # that includes partial english
             acromatches = [p for p in self.players
                            if ed.eval(''.join([each[0] for each in
-                                _englishdivides(p)[0][1:3]]).lower(),
+                                englishdivides(p)[0][1:3]]).lower(),
                                       lowvote) <= 0]
             if len(acromatches) == 1:
                 yield acromatches[0]
