@@ -20,12 +20,8 @@
 
 # ### Dependencies
 
-# In[1]:
-import gevent                  # async/concurrency
-from gevent import monkey
+# In[2]:
 
-# patches stdlib to cooperate w/ other greenlets
-monkey.patch_all()
 
 from datetime import datetime as dt # to parse timestamps
 from datetime import timedelta # parsing hours/minutes
