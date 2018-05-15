@@ -21,7 +21,11 @@
 # ### Dependencies
 
 # In[1]:
+import gevent                  # async/concurrency
+from gevent import monkey
 
+# patches stdlib to cooperate w/ other greenlets
+monkey.patch_all()
 
 from datetime import datetime as dt # to parse timestamps
 from datetime import timedelta # parsing hours/minutes
@@ -29,11 +33,6 @@ from math import ceil          # to get page# from post
 from lxml import html          # to help parse website content
 import requests                # for interacting with website
 import time                    # need delays before post requests
-import gevent                  # async/concurrency
-from gevent import monkey
-
-# patches stdlib to cooperate w/ other greenlets
-monkey.patch_all()
 
 
 # ### Urls donbot will construct requests with
