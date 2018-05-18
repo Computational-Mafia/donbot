@@ -127,8 +127,14 @@ class Donbot(object):
         if len(thread) == 0:
             raise ValueError('No thread specified!')
         page = self.session.get(thread).content
-        numberOfPosts = html.fromstring(page).xpath(postcountpath)[0]
-        return int(numberOfPosts[:numberOfPosts.find(' ')].strip())
+
+        # if there are unread posts, post number is at index 1
+        for result in html.fromstring(page).xpath(postcountpath):
+            numOfPosts = re.findall(r"\d+ posts", result.strip())
+            if len(numOfPosts) > 0:
+                return int(numOfPosts[0].replace(" posts", ""))
+
+        raise Exception('failed to get number of posts!')
     
     def getActivityOverview(self, thread=None):
         thread = thread if thread else self.thread
