@@ -185,18 +185,26 @@ class Donbot(object):
         
         # one request to get form info for post, and another to make it
         threadid = thread[thread.find('?')+1:]
-        page = html.fromstring(self.session.get(
-            posturl.format(thread[thread.find('?')+1:])).content)
-        form = {'message': content, 'addbbcode20': 100,
-                'post': 'Submit', 'disable_smilies': 'on',
-                'attach_sig': 'on', 'icon': 0}
-        for name in ['topic_cur_post_id', 'lastclick',
-                     'creation_time','form_token']:
+
+        request = gevent.spawn(self.session.get, posturl.format(threadid))
+        gevent.wait([request])
+
+        page = html.fromstring(request.value.content)
+
+        form = {
+            'message': content,
+            'addbbcode20': 100,
+            'post': 'Submit',
+            'disable_smilies': 'on',
+            'attach_sig': 'on',
+            'icon': 0
+        }
+        for name in ['topic_cur_post_id', 'lastclick', 'creation_time', 'form_token']:
             form[name] = page.xpath(postformpath.format(name))[0]
 
         time.sleep(postdelay)
-        self.session.post(posturl.format(
-            thread[thread.find('?')+1:]), form)
+        result = gevent.spawn(self.session.post, posturl.format(threadid), form)
+        gevent.wait([result])
         
     def sendPM(self, subject, body, sendto, postdelay=None):
         # one request to get form info for pm, and another to send it
