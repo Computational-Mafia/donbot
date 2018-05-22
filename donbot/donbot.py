@@ -33,6 +33,7 @@ from math import floor          # to get page# from post
 from lxml import html          # to help parse website content
 import requests                # for interacting with website
 import time                    # need delays before post requests
+import re
 
 
 # ### Urls donbot will construct requests with
