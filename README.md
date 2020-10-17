@@ -25,4 +25,4 @@ Within its directory, we include a detailed usage tutorial intending that even P
 We'll start by reproducing a baseline donbot library using content from the now-archived `modbot` repo. From there, we'll organize an index of developed utilities and begin adding new features.
  
  ## Contributing
- This project welcomes contributions of all types. Feature suggestions as well as help spec'ing, design, documentation, finding bugs are ways everyone can help on top of coding features / bug fixes. We are excited to work with the power user community to build a set of tools for helping you get the most out of MafiaScum.Net.
+ This project welcomes contributions of all types. Feature suggestions as well as help specifying, designing, documenting, finding bugs are ways everyone can help on top of coding features / bug fixes. We are excited to work with the power user community to build a set of tools for helping you get the most out of MafiaScum.Net.
