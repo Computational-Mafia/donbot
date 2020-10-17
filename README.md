@@ -15,7 +15,6 @@ To be detailed soon!
 - Send pms to a user with a specified subject and body
 - Collect the number of posts in a specified thread
 - Collect id matching a specified scummer's username
-- And more!
 
  Please don't use these functions haphazardly, especially those that make posts or send PMs, as misuse thereof can be against Site Rules, get you banned, and most importantly cause trouble for a lot of decent people.
 
