@@ -1,3 +1,5 @@
+NOTE: This repository is archived and no longer under development. You may be interested in [Donbot](https://github.com/Computational-Mafia/donbot), a growing collection of simple utilities for power users to automate operations on forum.mafiascum.net.
+
 # Modbot
 automating the more trivial activities a game moderator does on mafiascum.net, and other stuff sprouting from that effort
 
