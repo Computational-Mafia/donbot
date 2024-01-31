@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='donbot',
     version='0.1.0',
-    description='automating the more trivial activities a game moderator does on mafiascum.net, and other stuff sprouting from that effort',
+    description='automating the more trivial activities a game moderator does on mafiascum.net',
     author='Jordan Gunn',
     author_email='gunnjordanb@gmail.com',
     packages=find_packages(),
