@@ -14,4 +14,6 @@ Create an instance of the Donbot class with your username and password (and pote
 - Collect id matching a specified scummer's username
 - And, eventually, more!
 
+The target audience for this module is other developers. By having a pre-existing implementation of all the main ways to interact with the site, it should be easier for bot developers to focus on the logic of what they want their bot to do, rather than the minutiae of requesting and parsing the site's html.
+
 **Please** don't use these functions haphazardly, especially those that make posts or send PMs, as misuse thereof can be against Site Rules, get you banned, and most importantly cause trouble for a lot of decent people.
