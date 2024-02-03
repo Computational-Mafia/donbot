@@ -32,7 +32,6 @@ class Donbot:
         self.username = username
         self.session = login(username, password)
 
-
     def count_posts(self, thread: Optional[str] = None) -> int:
         """
         Counts the number of posts in the specified thread.
@@ -70,7 +69,7 @@ class Donbot:
         if len(username) == 0:
             raise ValueError("No username specified!")
         return get_user_id(self.session, username)
-    
+
     def get_activity_overview(self, thread: Optional[str] = None) -> list:
         """
         Gets the activity overview of the specified thread.
