@@ -1,3 +1,3 @@
-from .donbot import *
-from .helpers import *
-from .operations import *
+__all__ = ['Donbot']
+
+from .donbot import Donbot

@@ -2,8 +2,16 @@ from lxml import html
 import requests
 import json
 import time
+from math import floor
+from datetime import datetime as dt
 
-__all__ = ["load_credentials", "login", "count_posts", "get_user_id", "get_activity_overview"]
+__all__ = [
+    "load_credentials",
+    "login",
+    "count_posts",
+    "get_user_id",
+    "get_activity_overview",
+]
 
 
 def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, str]:
@@ -15,7 +23,7 @@ def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, s
     return username, password
 
 
-def login(username: str, password: str, request_delay: float = 1) -> requests.Session:
+def login(username: str, password: str, post_delay: float = 1) -> requests.Session:
     """
     Generates a session object and logs into mafiascum.net.
 
@@ -41,7 +49,7 @@ def login(username: str, password: str, request_delay: float = 1) -> requests.Se
     start_url = "https://forum.mafiascum.net/index.php"
     session = requests.Session()
     login_page = session.get(start_url).content
-    time.sleep(request_delay)
+    time.sleep(post_delay)
     creation_time = html.fromstring(login_page).xpath(
         "//input[@name='creation_time']/@value"
     )[0]
@@ -148,3 +156,60 @@ def get_activity_overview(session: requests.Session, thread: str) -> list[dict]:
             }
         )
     return userinfo
+
+
+def get_posts(
+    session: requests.Session, thread: str, start: int=0, end: int = -1
+) -> list[dict]:
+    """
+    Retrieve posts from a thread.
+
+    Parameters
+    ----------
+    session : requests.Session
+        The session object used for making HTTP requests.
+    thread : str
+        The thread to retrieve the posts of.
+    start : int, optional
+        The post number to start retrieving from. Default is 0.
+    end : int, optional
+        The post number to stop retrieving at. Default is infinity.
+
+    Returns
+    -------
+    list[dict]
+        Each post's data, including post `number`, `user, `time`, and `content`.
+    """
+
+    posts_per_page = 25
+    post_body_path = "//div[@class='postbody']"
+    post_number_path = ".//span[@class='post-number-bolded']//text()"
+    post_user_path = ".//a[@class='username']/text()"
+    post_content_path = ".//div[@class='content']"
+    post_timestamp_path = ".//p[@class='author modified']/text()"
+    end = end if end != -1 else count_posts(session, thread)
+
+    # identify pages to visit
+    start_page_id = floor(start / posts_per_page) * posts_per_page
+    end_page_id = floor(end / posts_per_page) * posts_per_page
+
+    # collect on each page key content from posts after current post
+    posts = []
+    for page_index in range(start_page_id, (end_page_id + 1), posts_per_page):
+        page = session.get(f"{thread}&start={str(page_index)}").content
+        for raw_post in html.fromstring(page).xpath(post_body_path):
+            post_number = int(raw_post.xpath(post_number_path)[0][1:])
+            if post_number < start or post_number > end:
+                continue
+            posts.append({"number": post_number})
+            posts[-1]["user"] = raw_post.xpath(post_user_path)[0]
+            posts[-1]["content"] = raw_post.xpath(post_content_path)[0]
+            posts[-1]["content"] = html.tostring(raw_post.xpath(post_content_path)[0])
+            posts[-1]["content"] = posts[-1]["content"].decode("UTF-8").strip()[21:-6]
+            posts[-1]["time"] = raw_post.xpath(post_timestamp_path)[-1]
+            posts[-1]["time"] = posts[-1]["time"][
+                posts[-1]["time"].find("» ") + 2 :
+            ].strip()
+            posts[-1]["time"] = dt.strptime(posts[-1]["time"], "%a %b %d, %Y %I:%M %p")
+
+    return posts

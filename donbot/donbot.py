@@ -1,5 +1,5 @@
 from typing import Optional
-from .operations import login, count_posts, get_user_id, get_activity_overview
+from .operations import login, count_posts, get_user_id, get_activity_overview, get_posts
 
 __all__ = ["Donbot"]
 
@@ -16,8 +16,8 @@ class Donbot:
         The password associated with the Donbot instance.
     thread : str, optional
         The thread associated with the Donbot instance, if specified.
-    postdelay : float, optional
-        The delay between posts, in seconds. Default is 3.0.
+    post_delay : float, optional
+        Delay after POST requests (3 seconds by default). Required to prevent rate limiting.
     """
 
     def __init__(
@@ -25,12 +25,12 @@ class Donbot:
         username: str,
         password: str,
         thread: Optional[str] = None,
-        postdelay: float = 3.0,
+        post_delay: float = 3.0,
     ):
-        self.postdelay = postdelay
+        self.postdelay = post_delay
         self.thread = thread or ""
         self.username = username
-        self.session = login(username, password)
+        self.session = login(username, password, post_delay)
 
     def count_posts(self, thread: Optional[str] = None) -> int:
         """
@@ -88,3 +88,26 @@ class Donbot:
         if len(thread) == 0:
             raise ValueError("No thread specified!")
         return get_activity_overview(self.session, thread)
+
+    def get_posts(self, thread: Optional[str] = None, start: int = 0, end: int = -1) -> list[dict]:
+        """
+        Gets the posts in the specified thread.
+
+        Parameters
+        ----------
+        thread : str, optional
+            The thread to get posts from.
+        start : int, optional
+            The starting post number.
+        end : int, optional
+            The ending post number.
+
+        Returns
+        -------
+        list
+            The posts in the specified thread.
+        """
+        thread = thread or self.thread
+        if len(thread) == 0:
+            raise ValueError("No thread specified!")
+        return get_posts(self.session, thread, start, end)
