@@ -1,5 +1,5 @@
 from typing import Optional
-from .operations import login, count_posts
+from .operations import login, count_posts, get_user_id, get_activity_overview
 
 __all__ = ["Donbot"]
 
@@ -51,3 +51,41 @@ class Donbot:
         if len(thread) == 0:
             raise ValueError("No thread specified!")
         return count_posts(self.session, thread)
+
+    def get_user_id(self, username: Optional[str]) -> str:
+        """
+        Gets the user ID of the specified username.
+
+        Parameters
+        ----------
+        username : str, optional
+            The username to get the ID of.
+
+        Returns
+        -------
+        str
+            The user ID of the specified username.
+        """
+        username = username or self.username
+        if len(username) == 0:
+            raise ValueError("No username specified!")
+        return get_user_id(self.session, username)
+    
+    def get_activity_overview(self, thread: Optional[str] = None) -> list:
+        """
+        Gets the activity overview of the specified thread.
+
+        Parameters
+        ----------
+        thread : str, optional
+            The thread to get the activity overview of.
+
+        Returns
+        -------
+        list
+            The activity overview of the specified thread.
+        """
+        thread = thread or self.thread
+        if len(thread) == 0:
+            raise ValueError("No thread specified!")
+        return get_activity_overview(self.session, thread)
