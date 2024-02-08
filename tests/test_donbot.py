@@ -66,6 +66,8 @@ def test_retrieve_all_posts():
 
     posts = donbot.get_posts(single_page_thread)
     assert len(posts) == donbot.count_posts(single_page_thread)
+
+    assert posts[0]["id"] == "12069063"
     assert posts[0]["user"] == "brighteningskies"
     assert posts[0]["time"] == datetime.strptime(
         "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p"
@@ -73,6 +75,7 @@ def test_retrieve_all_posts():
     assert posts[0]["number"] == 0
     assert "I'll start: it's 1am" in posts[0]["content"]
 
+    assert posts[-1]["id"] == "12078076"
     assert posts[-1]["user"] == "Ythan"
     assert posts[-1]["time"] == datetime.strptime(
         "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p"
@@ -89,6 +92,7 @@ def test_get_one_post():
 
     posts = [donbot.get_post(0), donbot.get_post(14)]
 
+    assert posts[0]["id"] == "12069063"
     assert posts[0]["user"] == "brighteningskies"
     assert posts[0]["time"] == datetime.strptime(
         "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p"
@@ -96,6 +100,7 @@ def test_get_one_post():
     assert posts[0]["number"] == 0
     assert "I'll start: it's 1am" in posts[0]["content"]
 
+    assert posts[-1]["id"] == "12078076"
     assert posts[-1]["user"] == "Ythan"
     assert posts[-1]["time"] == datetime.strptime(
         "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p"
@@ -105,7 +110,7 @@ def test_get_one_post():
 
 
 def test_make_post():
-    "Donbot should be able to add a post to the site's office test post thread."
+    "Donbot should be able to add a post to the site's official test post thread."
 
     # setup
     username, password = load_credentials()
@@ -118,4 +123,21 @@ def test_make_post():
     # check if we pulled it off
     post_count = donbot.count_posts(test_post_thread)
     last_post = donbot.get_posts(test_post_thread, post_count - 1, post_count)[0]
+    assert test_content in last_post["content"]
+
+
+def test_edit_post():
+    "Donbot should be able to edit a submitted post on the site's official test post thread"
+
+    # setup
+    test_post_number = 1506
+    username, password = load_credentials()
+    donbot = Donbot(username, password, test_post_thread)
+    test_content = f"test{random.randint(1, 100)}"
+
+    # operation
+    donbot.edit_post(test_post_number, test_content)
+
+    # check if we pulled it off
+    last_post = donbot.get_post(test_post_number)
     assert test_content in last_post["content"]

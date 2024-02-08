@@ -7,6 +7,7 @@ from .operations import (
     get_posts,
     get_post,
     make_post,
+    edit_post,
 )
 
 __all__ = ["Donbot"]
@@ -166,3 +167,30 @@ class Donbot:
         if len(thread) == 0:
             raise ValueError("No thread specified!")
         make_post(self.session, thread, content, post_delay)
+
+    def edit_post(
+        self,
+        post_number: int,
+        content: str,
+        thread: Optional[str] = None,
+        post_delay: Optional[float] = None,
+    ):
+        """
+        Edits a post in the specified thread.
+
+        Parameters
+        ----------
+        post_number : int
+            The post number to edit.
+        content : str
+            The content of the post.
+        thread : str, optional
+            The thread to edit a post in.
+        post_delay : float, optional
+            Delay after POST requests (3 seconds by default). Required to prevent rate limiting.
+        """
+        thread = thread or self.thread
+        post_delay = post_delay or self.postdelay
+        if len(thread) == 0:
+            raise ValueError("No thread specified!")
+        edit_post(self.session, thread, post_number, content, post_delay)

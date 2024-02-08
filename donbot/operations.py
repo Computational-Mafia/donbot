@@ -177,7 +177,7 @@ def get_posts(
     Returns
     -------
     list[dict]
-        Each post's data, including post `number`, `user, `time`, and `content`.
+        Each post's data, including post `id`, `number`, `user, `time`, and `content`.
     """
 
     posts_per_page = 25
@@ -186,6 +186,7 @@ def get_posts(
     post_user_path = ".//a[@class='username' or @class='username-coloured']/text()"
     post_content_path = ".//div[@class='content']"
     post_timestamp_path = ".//p[@class='author modified']/text()"
+    post_id_path = ".//a/@href"
     end = end if end != -1 else count_posts(session, thread)
 
     # identify pages to visit
@@ -201,6 +202,8 @@ def get_posts(
             if post_number < start or post_number > end:
                 continue
             posts.append({"number": post_number})
+            posts[-1]["id"] = raw_post.xpath(post_id_path)[0]
+            posts[-1]["id"] = posts[-1]["id"][posts[-1]["id"].rfind("#") + 2 :]
             posts[-1]["user"] = raw_post.xpath(post_user_path)[0]
             posts[-1]["content"] = raw_post.xpath(post_content_path)[0]
             posts[-1]["content"] = html.tostring(raw_post.xpath(post_content_path)[0])
@@ -230,7 +233,7 @@ def get_post(session: requests.Session, thread: str, post_number: int) -> dict:
     Returns
     -------
     dict
-        The post's data, including `number`, `user, `time`, and `content`.
+        The post's data, including `id`, `number`, `user, `time`, and `content`.
     """
     posts = get_posts(session, thread, post_number, post_number + 1)
     return posts[0]
@@ -271,3 +274,52 @@ def make_post(
         post_data[name] = page.xpath(post_form_path.format(name))[0]
     time.sleep(post_delay)
     session.post(post_url, data=post_data)
+
+
+def edit_post(
+    session: requests.Session,
+    thread: str,
+    post_number: int,
+    content: str,
+    post_delay: float = 1.0,
+):
+    """
+    Edit a post in a thread.
+
+    Parameters
+    ----------
+    session : requests.Session
+        The session object used for making HTTP requests.
+    thread : str
+        The thread to retrieve the posts of.
+    post_number : int
+        The number of the post to edit.
+    content : str
+        The content of the post to make.
+    post_delay : float, optional
+        The delay between requests, in seconds. Default is 1.0.
+    """
+
+    # one request to get post id
+    post_id = get_post(session, thread, post_number)["id"]
+    edit_url = f"https://forum.mafiascum.net/posting.php?mode=edit&p={post_id}"
+
+    # and another to get form info for edit
+    page = html.fromstring(session.get(edit_url).content)
+
+    # and another to make it
+    post_data = {
+        "message": content,
+        "post": "Submit",
+        "addbbcode20": 100,
+    }
+    for name in [
+        "edit_post_message_checksum",
+        "edit_post_subject_checksum",
+        "creation_time",
+        "form_token",
+    ]:
+        post_data[name] = page.xpath(f"//input[@name='{name}']/@value")[0]
+
+    time.sleep(post_delay)
+    session.post(edit_url, data=post_data)
