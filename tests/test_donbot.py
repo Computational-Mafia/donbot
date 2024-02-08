@@ -5,6 +5,7 @@ import random
 
 single_page_thread = "https://forum.mafiascum.net/viewtopic.php?f=53&t=84030"
 test_post_thread = "https://forum.mafiascum.net/viewtopic.php?t=12551"
+unread_posts_thread = "https://forum.mafiascum.net/viewtopic.php?t=79281"
 
 
 def test_credentials_exist():
@@ -23,6 +24,14 @@ def test_count_posts():
     username, password = load_credentials()
     donbot = Donbot(username, password)
     assert donbot.count_posts(single_page_thread) == 15
+
+
+def test_count_posts_in_unread_thread():
+    "Donbot should be able to count posts in a thread with unread posts"
+
+    username, password = load_credentials()
+    donbot = Donbot(username, password)
+    assert donbot.count_posts(unread_posts_thread) == 4616
 
 
 def test_get_user_id():
