@@ -1,5 +1,13 @@
 from typing import Optional
-from .operations import login, count_posts, get_user_id, get_activity_overview, get_posts
+from .operations import (
+    login,
+    count_posts,
+    get_user_id,
+    get_activity_overview,
+    get_posts,
+    get_post,
+    make_post,
+)
 
 __all__ = ["Donbot"]
 
@@ -89,7 +97,9 @@ class Donbot:
             raise ValueError("No thread specified!")
         return get_activity_overview(self.session, thread)
 
-    def get_posts(self, thread: Optional[str] = None, start: int = 0, end: int = -1) -> list[dict]:
+    def get_posts(
+        self, thread: Optional[str] = None, start: int = 0, end: int = -1
+    ) -> list[dict]:
         """
         Gets the posts in the specified thread.
 
@@ -111,3 +121,48 @@ class Donbot:
         if len(thread) == 0:
             raise ValueError("No thread specified!")
         return get_posts(self.session, thread, start, end)
+
+    def get_post(self, post_number: int = 0, thread: Optional[str] = None) -> dict:
+        """
+        Gets a post in the specified thread.
+
+        Parameters
+        ----------
+        post_number : int, optional
+            The post number to get.
+        thread : str, optional
+            The thread to get the post from.
+
+        Returns
+        -------
+        dict
+            The post in the specified thread.
+        """
+        thread = thread or self.thread
+        if len(thread) == 0:
+            raise ValueError("No thread specified!")
+        return get_post(self.session, thread, post_number)
+
+    def make_post(
+        self,
+        content: str = ".",
+        thread: Optional[str] = None,
+        post_delay: Optional[float] = None,
+    ):
+        """
+        Makes a post in the specified thread.
+
+        Parameters
+        ----------
+        thread : str, optional
+            The thread to make a post in.
+        content : str
+            The content of the post.
+        post_delay : float, optional
+            Delay after POST requests (3 seconds by default). Required to prevent rate limiting.
+        """
+        thread = thread or self.thread
+        post_delay = post_delay or self.postdelay
+        if len(thread) == 0:
+            raise ValueError("No thread specified!")
+        make_post(self.session, thread, content, post_delay)

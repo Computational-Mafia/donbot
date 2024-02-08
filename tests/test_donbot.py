@@ -1,8 +1,11 @@
 from donbot import Donbot
 from donbot.operations import load_credentials
 from datetime import datetime
+import random
 
 single_page_thread = "https://forum.mafiascum.net/viewtopic.php?f=53&t=84030"
+test_post_thread = "https://forum.mafiascum.net/viewtopic.php?t=12551"
+
 
 def test_credentials_exist():
     "Credentials should be loaded from 'credentials.json' file"
@@ -19,10 +22,7 @@ def test_count_posts():
 
     username, password = load_credentials()
     donbot = Donbot(username, password)
-    assert (
-        donbot.count_posts(single_page_thread)
-        == 15
-    )
+    assert donbot.count_posts(single_page_thread) == 15
 
 
 def test_get_user_id():
@@ -39,9 +39,7 @@ def test_get_activity_overview():
     username, password = load_credentials()
     donbot = Donbot(username, password)
 
-    activity_overview = donbot.get_activity_overview(
-        single_page_thread
-    )
+    activity_overview = donbot.get_activity_overview(single_page_thread)
 
     assert len(activity_overview) == 6
     assert activity_overview[0]["user"] == "Ythan"
@@ -61,12 +59,54 @@ def test_retrieve_all_posts():
     assert len(posts) == donbot.count_posts(single_page_thread)
     assert posts[0]["user"] == "brighteningskies"
     assert posts[0]["time"] == datetime.strptime(
-        "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p")
+        "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p"
+    )
     assert posts[0]["number"] == 0
     assert "I'll start: it's 1am" in posts[0]["content"]
 
     assert posts[-1]["user"] == "Ythan"
     assert posts[-1]["time"] == datetime.strptime(
-        "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p")
+        "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p"
+    )
     assert posts[-1]["number"] == 14
     assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
+
+
+def test_get_one_post():
+    "Donbot should be able to retrieve a single specified post in a thread"
+
+    username, password = load_credentials()
+    donbot = Donbot(username, password, single_page_thread)
+
+    posts = [donbot.get_post(0), donbot.get_post(14)]
+
+    assert posts[0]["user"] == "brighteningskies"
+    assert posts[0]["time"] == datetime.strptime(
+        "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p"
+    )
+    assert posts[0]["number"] == 0
+    assert "I'll start: it's 1am" in posts[0]["content"]
+
+    assert posts[-1]["user"] == "Ythan"
+    assert posts[-1]["time"] == datetime.strptime(
+        "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p"
+    )
+    assert posts[-1]["number"] == 14
+    assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
+
+
+def test_make_post():
+    "Donbot should be able to add a post to the site's office test post thread."
+
+    # setup
+    username, password = load_credentials()
+    donbot = Donbot(username, password, test_post_thread)
+    test_content = f"test{random.randint(1, 100)}"
+
+    # operation
+    donbot.make_post(test_content)
+
+    # check if we pulled it off
+    post_count = donbot.count_posts(test_post_thread)
+    last_post = donbot.get_posts(test_post_thread, post_count - 1, post_count)[0]
+    assert test_content in last_post["content"]

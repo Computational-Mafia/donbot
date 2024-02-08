@@ -23,7 +23,7 @@ def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, s
     return username, password
 
 
-def login(username: str, password: str, post_delay: float = 1) -> requests.Session:
+def login(username: str, password: str, post_delay: float = 1.0) -> requests.Session:
     """
     Generates a session object and logs into mafiascum.net.
 
@@ -67,7 +67,6 @@ def login(username: str, password: str, post_delay: float = 1) -> requests.Sessi
 
     login_url = "https://forum.mafiascum.net/ucp.php?mode=login"
     session.post(login_url, data=form_data, headers={"Referer": start_url})
-    session.cookies.values()
     return session
 
 
@@ -159,7 +158,7 @@ def get_activity_overview(session: requests.Session, thread: str) -> list[dict]:
 
 
 def get_posts(
-    session: requests.Session, thread: str, start: int=0, end: int = -1
+    session: requests.Session, thread: str, start: int = 0, end: int = -1
 ) -> list[dict]:
     """
     Retrieve posts from a thread.
@@ -184,7 +183,7 @@ def get_posts(
     posts_per_page = 25
     post_body_path = "//div[@class='postbody']"
     post_number_path = ".//span[@class='post-number-bolded']//text()"
-    post_user_path = ".//a[@class='username']/text()"
+    post_user_path = ".//a[@class='username' or @class='username-coloured']/text()"
     post_content_path = ".//div[@class='content']"
     post_timestamp_path = ".//p[@class='author modified']/text()"
     end = end if end != -1 else count_posts(session, thread)
@@ -213,3 +212,62 @@ def get_posts(
             posts[-1]["time"] = dt.strptime(posts[-1]["time"], "%a %b %d, %Y %I:%M %p")
 
     return posts
+
+
+def get_post(session: requests.Session, thread: str, post_number: int) -> dict:
+    """
+    Retrieve a single post from a thread.
+
+    Parameters
+    ----------
+    session : requests.Session
+        The session object used for making HTTP requests.
+    thread : str
+        The thread to retrieve the post from.
+    post_number : int
+        The number of the post to retrieve.
+
+    Returns
+    -------
+    dict
+        The post's data, including `number`, `user, `time`, and `content`.
+    """
+    posts = get_posts(session, thread, post_number, post_number + 1)
+    return posts[0]
+
+
+def make_post(
+    session: requests.Session, thread: str, content: str, post_delay: float = 1.0
+):
+    """
+    Make a post in a thread.
+
+    Parameters
+    ----------
+    session : requests.Session
+        The session object used for making HTTP requests.
+    thread : str
+        The thread to retrieve the posts of.
+    content : str
+        The content of the post to make.
+    post_delay : float, optional
+        The delay between requests, in seconds. Default is 1.0.
+    """
+    post_url = "https://forum.mafiascum.net/posting.php?mode=reply&t={}"
+    post_form_path = "//input[@name='{}']/@value"
+
+    # one request to get form info for post
+    thread_id = thread[thread.find("t=") + 2 :]
+    post_url = post_url.format(thread_id)
+    page = html.fromstring(session.get(post_url).content)
+
+    # and another to make it
+    post_data = {
+        "message": content,
+        "post": "Submit",
+        "addbbcode20": 100,
+    }
+    for name in ["topic_cur_post_id", "creation_time", "form_token"]:
+        post_data[name] = page.xpath(post_form_path.format(name))[0]
+    time.sleep(post_delay)
+    session.post(post_url, data=post_data)
