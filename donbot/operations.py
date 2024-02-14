@@ -11,6 +11,10 @@ __all__ = [
     "count_posts",
     "get_user_id",
     "get_activity_overview",
+    "get_posts",
+    "get_post",
+    "make_post",
+    "edit_post",
 ]
 
 
