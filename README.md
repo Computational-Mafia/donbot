@@ -1,4 +1,4 @@
-# Donbot: Automate Your Threads on Mafiascum.net 🤖🤵
+# Donbot: Automate Activities on Mafiascum.net 🤖🤵
 Donbot is a Python library for automating activities on mafiascum.net. 
 
 ## Description 📖
