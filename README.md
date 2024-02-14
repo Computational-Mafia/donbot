@@ -54,5 +54,5 @@ These will be listed here as they are implemented (and validated).
 Donbot is available on PyPI, so you can install it with pip:
 
 ```bash
-pip install donbot
+pip install donbot-python
 ```
