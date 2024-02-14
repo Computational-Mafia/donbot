@@ -1,8 +1,6 @@
 # Donbot: Automate Activities on Mafiascum.net 🤖🤵
 Donbot is a Python library for automating activities on mafiascum.net. 
 
-## Description 📖
-
 Forum-based mafia games are a popular form of social deduction game. Mafiascum.net is a popular forum for playing these games. Donbot is designed to make it easier to interact with the site programmatically. By having a pre-existing implementation of all the main ways to interact with the site, it should be easier for bot developers to focus on the logic of what they want done, rather than the minutiae of constructing valid requests and parsing the site's html.
 
 For game moderators, the library can be used to automate the process of updating the game thread with votecounts, player lists, and other information. For players and researchers, the library can be used to automate the process of collecting and analyzing data from the site. Even outside of games, the tools can help manage complex threads or send mass PMs customized to each recipient.
