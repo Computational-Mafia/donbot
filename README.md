@@ -1,4 +1,5 @@
 # Donbot: Automate Activities on Mafiascum.net 🤖🤵
+
 Donbot is a Python library for automating activities on mafiascum.net. 
 
 Forum-based mafia games are a popular form of social deduction game. Mafiascum.net is a popular forum for playing these games. Donbot is designed to make it easier to interact with the site programmatically. By having a pre-existing implementation of all the main ways to interact with the site, it should be easier for bot developers to focus on the logic of what they want done, rather than the minutiae of constructing valid requests and parsing the site's html.
@@ -7,9 +8,26 @@ For game moderators, the library can be used to automate the process of updating
 
 **Please** don't use these functions haphazardly, especially those that make posts or send PMs, as misuse thereof can be against Site Rules, get you banned, and most importantly cause trouble for a lot of decent people.
 
-## Usage 🍲
+## Implemented Utilities 📋
 
-For most users, Donbot is most easily by importing the `Donbot` class and initializing it with your account credentials -- ideally in a more secure way than hardcoding them into your script. You can either specify the thread you want to interact with when you initialize the bot (ideal when it's just that one thread), or specify it later when you call a function that requires it.
+Using donbot, we've already automated a number of common workflows on mafiascum.net and host them in Google Colaboratory notebooks. These can be executed in the cloud without any setup, making them accessible even to people who don't write code. Just click the "Open in Colab" button next to a utility to get srated. Here's a table of what we have so far:
+
+| Utility | Description  | Open in Colab | Notes |
+| --- | --- | --- | --- |
+| Youtube Playlist Extractor | Extracts YouTube video links from a thread and compiles them into a playlist | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Computational-Mafia/donbot/blob/f288643e18552e6768d7c7b4b9cfc943cdce61a5/examples/youtube_playlist_extraction/Youtube_Playlist_Extractor.ipynb) | Tested for threads with ~50 videos |
+| Thread Scraping | Uses scrapy to download a thread's posts into a structured JSONL file | | See full example for multi-thread scraping! |
+
+## Using the Library 🍲
+
+Donbot is available on PyPI, so you can install it with pip:
+
+```bash
+pip install donbot-python
+```
+
+For most developers, it's most easy to get started by importing the `Donbot` class and initializing it with your account credentials -- ideally in a more secure way than hardcoding them into your script. You can either specify the thread you want to interact with when you initialize the bot (ideal when it's just that one thread), or specify it later when you call a function that requires it.
+
+Check out `donbot/donbot.py` for a full list of available functions and their docstrings. Here's a basic demo of some of the things you can do with the library:
 
 ```python
 from donbot import Donbot
@@ -41,18 +59,10 @@ new_content = f"{post_content} and also very cool"
 bot.edit_post(post_count+1, new_content)
 ```
 
-For more flexibility and control, power users can instead import functions from the `donbot.operations` submodule to operate on `request.Session` objects directly. Every operation supported by the Donbot class is implemented as a function in this submodule, and takes a `requests.Session` object as its first argument, and sometimes other arguments that the Donbot class normally handles for you. This allows for more fine-grained control over the requests being made, and can be useful for more complex workflows -- like if you were scraping lots of data from the site using a framework like `scrapy` or `beautifulsoup`. We de-emphasize this approach in our documentation, but will frequently prefer it in downstream projects.
+## Advanced Usage 🛠️
 
-## Implemented Workflows 🛠️
+The donbot library is divided into two main parts: the `Donbot` class and the `operations` submodule. The `Donbot` class uses the `requests` library to make HTTP requests to the site and calls functions from the `donbot.operations` submodule to extract data and prepare actions on the site.
 
-In addition to supporting the basic usage, the library also aims to support a range of more complex but particularly common workflows that are common across mafia games.
+Power users comfortable with other libraries for making HTTP requests such as `scrapy` or `beautifulsoup` can sidestep the `Donbot` class and use functions in the `operations` submodule directly to streamline interactions with the site. This can be useful for tasks such as large-scale data collection or analysis, where the `requests` library may not be the best tool for the job.
 
-These will be listed here as they are implemented (and validated).
-
-## Installation 📦
-
-Donbot is available on PyPI, so you can install it with pip:
-
-```bash
-pip install donbot-python
-```
+Check out our examples directory for scripts that demonstrate the library's interopability with other libraries and its use in more complex workflows.

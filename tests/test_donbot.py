@@ -5,7 +5,7 @@ import random
 
 single_page_thread = "https://forum.mafiascum.net/viewtopic.php?f=53&t=84030"
 test_post_thread = "https://forum.mafiascum.net/viewtopic.php?t=12551"
-unread_posts_thread = "https://forum.mafiascum.net/viewtopic.php?t=79281"
+unread_posts_thread = "https://forum.mafiascum.net/viewtopic.php?t=84934"
 
 
 def test_credentials_exist():
@@ -31,7 +31,7 @@ def test_count_posts_in_unread_thread():
 
     username, password = load_credentials()
     donbot = Donbot(username, password)
-    assert donbot.count_posts(unread_posts_thread) == 4616
+    assert donbot.count_posts(unread_posts_thread) == 66
 
 
 def test_get_user_id():

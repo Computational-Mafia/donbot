@@ -3,22 +3,24 @@ import math
 import logging
 import json
 from scrapy.crawler import CrawlerProcess
-from scrapy.selector import Selector
+from lxml import html
+from donbot.operations import count_posts, get_posts
 from tqdm import tqdm
 import os
 
 
-perpage = 25
+posts_per_page = 25
 
 
 class PostItem(scrapy.Item):
+    number = scrapy.Field()
+    id = scrapy.Field()
+    user = scrapy.Field()
+    content = scrapy.Field()
+    time = scrapy.Field()
     pagelink = scrapy.Field()
     forum = scrapy.Field()
     thread = scrapy.Field()
-    number = scrapy.Field()
-    timestamp = scrapy.Field()
-    user = scrapy.Field()
-    content = scrapy.Field()
 
 
 # The following pipeline stores all scraped items (from all spiders)
@@ -55,76 +57,34 @@ class MafiaScumSpider(scrapy.Spider):
         with open("archive.txt") as f:
             urls = [each[: each.find("\n")] for each in f.read().split("\n\n\n")]
         for url in tqdm(urls):
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield scrapy.Request(url=url, callback=self.request_each_page)
 
-    # get page counts and then do the REAL parse on every single page
-    def parse(self, response):
-        # find page count
+    def request_each_page(self, response):
+        "Generates scrapy.Request objects for each page of a thread."
         try:
-            postcount = (
-                Selector(response).xpath('//div[@class="pagination"]/text()').extract()
-            )
-            postcount = int(postcount[0][4 : postcount[0].find(" ")])
+            thread = response.url
+            post_count = count_posts(html.fromstring(response.body))
+            end_page_id = math.floor(post_count / posts_per_page) * posts_per_page
 
-            # yield parse for every page of thread
-            for i in range(math.ceil(postcount / perpage)):
+            for page_id in range(0, end_page_id, posts_per_page):
                 yield scrapy.Request(
-                    f"{response.url}&start={str(i * perpage)}",
+                    f"{thread}&start={str(page_id)}",
                     callback=self.process_posts,
                 )
-        except IndexError:  # if can't, the thread probably doesn't exist
-            return
+        except IndexError:
+            return  # occurs when the requested thread doesn't exist or is empty (?)
 
     def process_posts(self, response):
-        # scan through posts on page and yield Post items for each
-        sel = Selector(response)
-        location = sel.xpath('//div[@id="page-body"]/h2/a/@href').extract()[0]
-        forum = location[location.find("f=") + 2 : location.find("&t=")]
-        if location.count("&") == 1:
-            thread = location[location.find("&t=") + 3 :]
-        elif location.count("&") == 2:
-            thread = location[location.find("&t=") + 3 : location.rfind("&")]
-
-        posts = sel.xpath('//div[@class="post bg1"]') + sel.xpath(
-            '//div[@class="post bg2"]'
-        )
-
-        for p in posts:
-            post = PostItem()
-            post["forum"] = forum
-            post["thread"] = thread
-            post["pagelink"] = response.url
-            try:
-                post["number"] = p.xpath(
-                    'div/div[@class="postbody"]/p/a[2]/strong/text()'
-                ).extract()[0][1:]
-            except IndexError:
-                post["number"] = p.xpath(
-                    'div[@class="postbody"]/p/a[2]/strong/text()'
-                ).extract()[0][1:]
-
-            try:
-                post["timestamp"] = p.xpath("div/div/p/text()[4]").extract()[0][23:-4]
-            except IndexError:
-                post["timestamp"] = p.xpath(
-                    'div[@class="postbody"]/p/text()[4]'
-                ).extract()[0][23:-4]
-
-            try:
-                post["user"] = p.xpath("div/div/dl/dt/a/text()").extract()[0]
-            except IndexError:
-                post["user"] = "<>"
-
-            try:
-                post["content"] = p.xpath('div/div/div[@class="content"]').extract()[0][
-                    21:-6
-                ]
-            except IndexError:
-                post["content"] = p.xpath(
-                    'div[@class="postbody"]/div[@class="content"]'
-                ).extract()[0][21:-6]
-
-            yield post
+        "Extracts post data from a page of a thread."
+        thread_page_html = html.fromstring(response.body)
+        posts = get_posts(thread_page_html)
+        page_link = response.url
+        thread = page_link[page_link.find("&t=") + 3 : page_link.find("&start")]
+        forum = page_link[page_link.find("f=") + 2 : page_link.find("&t=")]
+        for post in posts:
+            yield PostItem(
+                {"pagelink": page_link, "forum": forum, "thread": thread, **post}
+            )
 
 
 if __name__ == "__main__":
@@ -142,14 +102,14 @@ if __name__ == "__main__":
     # Clean Up Results
     # Remove duplicate entries and sort by post number for every scraped game.
     # loop through every file in directory
-    for path, subdirs, files in os.walk("data/posts"):
+    for path, subdirs, files in os.walk("posts"):
         for name in files:
             # don't consider non-jsonl files
             if name[-5:] != "jsonl":
                 continue
 
             # load as dictionary, remove redundancies, and sort by post number
-            with open(f"data/posts/{name}") as posts_file:
+            with open(f"posts/{name}") as posts_file:
                 gameposts = [
                     dict(t)
                     for t in {
@@ -162,5 +122,5 @@ if __name__ == "__main__":
                 )
 
             # save result
-            with open(f"data/posts/{name}", "w") as f:
+            with open(f"posts/{name}", "w") as f:
                 f.write("\n".join([json.dumps(post) for post in gameposts]))
