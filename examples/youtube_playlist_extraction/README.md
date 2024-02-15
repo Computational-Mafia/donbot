@@ -1,0 +1,3 @@
+# YouTube Playlist Extractor
+
+A lot of threads on mafiascum.net contain links to YouTube videos distributed across multiple posts. Particularly when they share the same purpose or theme, it can be useful to extract these links and compile them into a single playlist for easy viewing or listening. This example demonstrates how to use donbot to extract YouTube video links from a thread and compile them into a playlist. By changing the thread URL parameter and maybe adding your account credentials, you can use this example to extract a playlist from any thread on the forum.
