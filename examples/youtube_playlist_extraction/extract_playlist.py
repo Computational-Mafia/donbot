@@ -23,8 +23,11 @@ def create_playlist_url(video_links: list[str]):
 
 
 if __name__ == "__main__":
-    thread = "https://forum.mafiascum.net/viewtopic.php?t=92087"
-    posts = get_posts(requests.Session(), thread)
+    thread = "https://forum.mafiascum.net/viewtopic.php?t=92087" # @param {type:"string"}
+    playlist_type = "music" # @param ["music", "regular videos"]
+
+    session = requests.Session()
+    posts = get_posts(session, thread)
     youtube_links = []
     for post in posts:
         if post["user"] != posts[0]["user"]:
@@ -33,4 +36,10 @@ if __name__ == "__main__":
         youtube_links.extend(extract_youtube_links(post["content"]))
 
     playlist_url = create_playlist_url(youtube_links)
-    print(playlist_url)
+    final_playlist_url = session.get(playlist_url).url
+    
+    print('Playlist URL:')
+    if playlist_type == 'music':
+        print(final_playlist_url.replace('www', 'music'))
+    else:
+        print(final_playlist_url)
