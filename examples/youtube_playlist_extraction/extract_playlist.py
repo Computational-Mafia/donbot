@@ -7,11 +7,12 @@ def extract_youtube_links(post_content: str):
     "Return all links to youtube videos in the post content"
 
     clean_youtube_links = []
-    for link in html.fromstring(post_content).xpath("//iframe/@src"):
-        if "youtube" not in link:
-            continue
-        video_id = link.split("/")[-1]
-        clean_youtube_links.append(f"https://www.youtube.com/watch?v={video_id}")
+    for link_path in ["//iframe/@src", "//a/@href"]:
+        for link in html.fromstring(post_content).xpath(link_path):
+            if "youtube" not in link and "youtu.be" not in link:
+                continue
+            video_id = link.split("/")[-1]
+            clean_youtube_links.append(f"https://www.youtube.com/watch?v={video_id}")
     return clean_youtube_links
 
 
@@ -23,11 +24,12 @@ def create_playlist_url(video_links: list[str]):
 
 
 if __name__ == "__main__":
-    thread = "https://forum.mafiascum.net/viewtopic.php?t=92087" # @param {type:"string"}
+    thread = "https://forum.mafiascum.net/viewtopic.php?t=92203" # @param {type:"string"}
     playlist_type = "music" # @param ["music", "regular videos"]
 
     session = requests.Session()
-    posts = get_posts(session, thread)
+    thread_page_html = html.fromstring(session.get(thread).content)
+    posts = get_posts(thread_page_html)
     youtube_links = []
     for post in posts:
         if post["user"] != posts[0]["user"]:
