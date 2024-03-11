@@ -16,7 +16,20 @@ __all__ = [
 
 
 def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, str]:
-    "Loads mafiascum credentials from a JSON file"
+    """
+    Loads mafiascum credentials from a JSON file.
+
+    Parameters
+    ----------
+    credentials_path : str, optional
+        The path to the JSON file containing the credentials. 
+        Defaults to "credentials.json" if not provided.
+
+    Returns
+    -------
+    tuple[str, str]
+        A tuple containing the username and password loaded from the JSON file.
+    """
     with open(credentials_path) as file:
         data = json.load(file)
         username = data.get("username")
