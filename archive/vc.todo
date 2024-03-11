@@ -16,3 +16,6 @@ Refactoring must be the name of the game.
 
 Need to find the sequence of small changes that maintain "completeness", add value, and approach the desired end state.
 
+To start, I can add a basic post processor (or include the one I have), and implement tests for really straightforward cases: Exact name matches, correct tags, no text, no other votes
+
+In fact, the test comes firs.t
