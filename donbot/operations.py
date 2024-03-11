@@ -1,8 +1,7 @@
 from lxml import html
 from lxml.html import HtmlElement
 import json
-import time
-from datetime import datetime as dt
+
 
 __all__ = [
     "load_credentials",
