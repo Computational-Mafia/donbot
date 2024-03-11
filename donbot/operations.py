@@ -255,3 +255,47 @@ def get_edit_post_form(
             0
         ]
     return post_data
+
+
+def get_send_pm_form(
+    send_pm_page_html: HtmlElement,
+    recipient_uids: list[str],
+    content: str,
+    subject: str,
+) -> dict[str, str]:
+    """
+    Extracts the form data for sending a private message from the send pm page HTML.
+
+    Parameters
+    ----------
+    send_pm_page_html : HtmlElement
+        The HTML of the send pm page.
+    recipient_uids : list[str]
+        User ids for recipient(s) of the private message.
+    content : str
+        The content of the private message.
+    subject : str
+        The subject of the private message.
+
+    Returns
+    -------
+    dict
+        The form data for sending a private message; if passed in a valid POST request, will send the private message.
+    """
+
+    post_data = {
+        "username_list": "",
+        "message": content,
+        "post": "Submit",
+        "icon": 0,
+        "subject": subject,
+        "addbbcode20": 100,
+        "status_switch": 0,
+        "disable_smilies": "on",
+        "attach_sig": "on",
+    }
+    for user in recipient_uids:
+        post_data[f"address_list[u][{user}]"] = "to"
+    for name in ["creation_time", "form_token"]:
+        post_data[name] = send_pm_page_html.xpath(f"//input[@name='{name}']/@value")[0]
+    return post_data

@@ -7,6 +7,7 @@ from .operations import (
     get_posts,
     get_make_post_form,
     get_edit_post_form,
+    get_send_pm_form,
 )
 from lxml import html
 from math import floor
@@ -64,7 +65,6 @@ class Donbot:
         time.sleep(post_delay)
         login_form = get_login_form(login_page_html, username, password)
         self.session.post(login_url, data=login_form, headers={"Referer": start_url})
-
 
     def count_posts(self, thread: Optional[str] = None) -> int:
         """
@@ -217,9 +217,11 @@ class Donbot:
         post_delay = post_delay or self.postdelay
         if len(thread) == 0:
             raise ValueError("No thread specified!")
-        
+
         thread_id = thread[thread.find("t=") + 2 :]
-        make_post_url = f"https://forum.mafiascum.net/posting.php?mode=reply&t={thread_id}"
+        make_post_url = (
+            f"https://forum.mafiascum.net/posting.php?mode=reply&t={thread_id}"
+        )
         make_post_page_html = html.fromstring(self.session.get(make_post_url).content)
         make_post_form = get_make_post_form(make_post_page_html, content)
         time.sleep(post_delay)
@@ -250,10 +252,40 @@ class Donbot:
         post_delay = post_delay or self.postdelay
         if len(thread) == 0:
             raise ValueError("No thread specified!")
-        
+
         post_id = self.get_post(post_number, thread)["id"]
         edit_post_url = f"https://forum.mafiascum.net/posting.php?mode=edit&p={post_id}"
         edit_post_page_html = html.fromstring(self.session.get(edit_post_url).content)
         edit_post_form = get_edit_post_form(edit_post_page_html, content)
         time.sleep(post_delay)
         self.session.post(edit_post_url, data=edit_post_form)
+
+    def send_pm(
+        self,
+        recipients: str | list[str],
+        subject: str = "Re: ",
+        content: str = ".",
+        post_delay: Optional[float] = None,
+    ):
+        """
+        Sends a private message to the specified recipient.
+
+        Parameters
+        ----------
+        recipient : str | list[str]
+            The recipient(s) of the private message.
+        subject : str
+            The subject of the private message. Defaults to "Re: ".
+        content : str
+            The content of the private message. Defaults to a period.
+        post_delay : float
+            Delay after POST requests (3 seconds by default). Required to prevent rate limiting.
+        """
+        post_delay = post_delay or self.postdelay
+        recipients = recipients if isinstance(recipients, list) else [recipients]
+        recipient_uids = [self.get_user_id(recipient) for recipient in recipients]
+        pm_url = "https://forum.mafiascum.net/ucp.php?i=pm&mode=compose"
+        pm_page_html = html.fromstring(self.session.get(pm_url).content)
+        send_pm_form = get_send_pm_form(pm_page_html, recipient_uids, content, subject)
+        time.sleep(post_delay)
+        self.session.post(pm_url, data=send_pm_form)

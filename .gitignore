@@ -167,6 +167,5 @@ main.synctex.gz
 
 %projects%numba_cmr/
 data/ltpFR2 Behavioral Data
-*.todo
 CREDENTIALS.json
 *.jsonl

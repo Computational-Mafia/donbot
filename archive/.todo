@@ -1,0 +1,83 @@
+I will probably want to ditch the votecounter and gamestate code -- for now.
+
+There's stuff in the votecounter folder about scraping normals, managing votecounts, testng the votecounter, and of course the votecounter itself. I don't want to lose this stuff, and it could be important to include a votecounter with donbot in the future. Maybe I move this stuff to the vca repository for now, and then decide what to do with it later.
+
+The gamestate code is honestly pretty irrelevant to any of my research goals, though it could help with the game simulation objective. I can go ahead and start the repository for that and then decide what to do with it later.
+
+The client code is interesting but can be its own repository too. Donbot provides the base library while the client code provides the interface to the bot. I can go ahead and start the repository for that and then decide what to do with it later.
+
+Alternatively, I could rename "client" as "demo" and then include it in the donbot repository. Depends on how involved the client code gets. It will be pretty involved. So yeah, refactor it out. The library should not have flask as a dependency.
+
+I shouldn't overthink this. I may have the votecounter back in this library once my vca module is robust. And maybe I'll decide it's easier to put application code here instead of in a separate repository. I can always reintegrate it later. For now, slice out whatever isn't a good foundation and tied to current milestones.
+
+✔ Move the votecounter code to the vca repository. @done(24-01-30 12:30)
+✔ Move the gamestate code to a gamestate repository. @done(24-01-30 13:01)
+- Move the client code to a client repository. Actually just rename as "applications" and clean up whatever code is there. @done(24-01-30 13:01)
+
+Now what do we have?
+A Donbot class, a readme, a demo notebook, a pagetopper, and a votecount reader
+
+demo notebook and readme are tiedd to one another
+
+I really like the demo/notebook thing. I can move that to the root the repository and keep it updated.
+
+Next is environment setup. I kind of want to try a more modern approach than before, but not if it's a lot of work. For now, I think I'll just stick with a conda environment. I can always change it later. I need to stop doing new things unless they either have a clear benefit or are easy to do.
+
+✔ Set up a conda environment for donbot. @20m @started(24-01-31 02:03) @done(24-01-31 02:25) @lasted(22m34s)
+
+Features:
+
+    ✔ Start a session @done(24-01-31 08:26)
+    ✔ Start an authenticated session @done(24-01-31 08:26)
+    ✔ Handle errors when starting a session @done(24-01-31 08:26)
+    ✔ Get user id @done(24-01-31 08:26)
+    ✔ Get number of posts in a thread @done(24-01-31 08:26)
+    ✔ Extract activity overviews from a thread @done(24-01-31 09:06)
+    ✔ Extract specified posts from a thread @done(24-02-03 14:13)
+    ✔ Make a post @started(24-02-07 21:29) @done(24-02-07 22:28) @lasted(59m56s)
+    ✔ Edit a post @started(24-02-07 22:50) @done(24-02-07 23:13) @lasted(23m28s)
+    ✔ Retrieve a single post with a specific number @done(24-02-07 22:38)
+    ✔ Send a PM @started(24-02-20 17:33) @done(24-02-20 18:21) @lasted(48m45s)
+    - Check for new PMs
+        Needed for testing the PM sending feature. not a priority.
+
+Use cases:
+    ✔ Web scraping with scrapy. Can I design library for easy integration with scrapy? @done(24-02-15 17:17)
+    ✘ Flask app. Can I readily trigger and parameterize donbot from a web interface? @cancelled(24-02-15 02:26)
+        I think google colab is a better way to do this. I can just use the notebook as a web interface, leaning on form elements and javascript to make the interface more user-friendly.
+    ✔ Playlist generator for threads w/ lots of youtube links. @done(24-02-15 02:24)
+    - Votecounter
+    - VCA helper
+    - Thread Index. Updates OP to link to all posts w/ a certain tag or feature. To be fancy, add a level of summarization (or just use the first line in the post?)
+    - Page topper
+
+Documentation:
+    ✔ Update the README to be less indulgent and reflect the current state of the library and also to be less speculative about future features @done(24-02-15 02:25)
+    ✘ Recapitulate the demo notebook! It really helped users imagine how to use the library. @cancelled(24-02-15 17:17)
+
+Decisions:
+    ✔ How much votecounter development goes into donbot? @20m @started(24-02-18 22:13) @done(24-02-18 22:22) @lasted(9m28s)
+        At minimum it's a separate module -- it needs too many of its own helper functions. 
+        Similarly it needs a separate test function script. 
+        But vote extraction is such a common use case for "a bot for automating stuff on a mafia forum" that it should be included in the library. 
+        The trouble is that full testing and development of the votecounter is a big project. 
+        Hmm, but is it though?
+        My current validation framework is pretty extensive. 
+        I think just like before I start by just devoting a module to it and then see if things grow unwieldy.
+        This way I at least have a "clean" space to work on the votecounter, and I can always refactor it out later if it gets too big.
+        The vca repository should not itself provide implementations then provided by donbot. So if I did specify the vote extraction in vca, it would end up refactored into donbot eventually.
+        So okay, it's decided.
+
+    ✔ How should I prioritize the thread index feature? @10m @started(24-02-18 22:24) @done(24-02-18 22:52) @lasted(28m55s)
+        The purpose of it is to help organize my threads around donbot and elsewhere. In mafiagames, it could help maintain the OP as a directory of key posts such as votecounts, gamestate updates, and other important information. In discussion threads, the directory would similarly track important information. For example, in my thread trying to organize a literature review, the directory would basically provide a table of contents for each new article I add to the thread.
+
+        But when do I do this? Technically the vote counter is the top priority. Would a thread directory help? By comparison, a page-topper would help me mod games but could not conceivabl help with research at all. Is this like that?
+
+        How much would it help to index updates like these? In general, I'm trying to pursue a lowkey approach to sharing my work. The relevant links are in my signature and I'm posting across the forum. I have to avoid being selfish and keep my thoughts on what other people want to talk about, only going out of my way to share stuff when it's relevant to the conversation. 
+        
+        Eventually though I will have a thread about my research. Maybe one of the existing ones. Is the lack of a directory maker the reason I don't currently update one? Nah, it's fear of ego. 
+
+        I'll do the directory thing when I feel confident enough that making a thread isn't just about me.
+
+    That means top priority for now is a vote counter and then a fuller VCA tool.
+

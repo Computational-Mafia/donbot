@@ -141,3 +141,16 @@ def test_edit_post():
     # check if we pulled it off
     last_post = donbot.get_post(test_post_number)
     assert test_content in last_post["content"]
+
+def test_send_pm():
+    "Donbot should be able to send a PM to a user"
+
+    # setup
+    username, password = load_credentials()
+    donbot = Donbot(username, password)
+    test_content = f"test{random.randint(1, 100)}"
+
+    # operation
+    donbot.send_pm("Psyche", "Test PM", test_content)
+
+    # we dont have a way to check if we pulled it off automatically, but we can check manually
