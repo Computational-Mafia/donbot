@@ -1,3 +1,11 @@
 So the votecounter has two big components. Maybe 3. 
 - The function that processes posts and returns any detected votes
-- The function that maintains a votecounter object and updates it with new votes
+- The function that maintains a votecounter object and updates it with new votes, returns a formatted votecount, etc.
+- The pipeline that runs the votecounter on all posts and updates the votecounter object with the results.
+- Also, the pipeline that validates the performance of my votecounter by running it on a test set of posts and comparing the results to the actual votes.
+- There's also the evaluation run that tries to predict the outcome of each Day phase (and game) based on extracted votes.
+
+The latter two differ in how they test the votecounter. The first involves defining a set of test cases for the votecounter to always pass in principle. The second is a more general test of the votecounter's performance over a sample dataset. It might inform development of new test cases or the votecounter.
+
+My theory is that one of the big factors slowing down votecoutner development was a failure to see the importance of defining and automatically evaluating concrete test cases. Instead, I just kept running the global validation framework, inspecting failures, changing my votecounter, and running it again. This was a slow and inefficient process and didn't create knowledge about votecounter constraints that could be used to guide development and validate alternative implementations.
+
