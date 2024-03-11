@@ -18,4 +18,4 @@ Need to find the sequence of small changes that maintain "completeness", add val
 
 To start, I can add a basic post processor (or include the one I have), and implement tests for really straightforward cases: Exact name matches, correct tags, no text, no other votes
 
-In fact, the test comes firs.t
+In fact, the test comes firs.
