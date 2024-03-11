@@ -9,3 +9,10 @@ The latter two differ in how they test the votecounter. The first involves defin
 
 My theory is that one of the big factors slowing down votecoutner development was a failure to see the importance of defining and automatically evaluating concrete test cases. Instead, I just kept running the global validation framework, inspecting failures, changing my votecounter, and running it again. This was a slow and inefficient process and didn't create knowledge about votecounter constraints that could be used to guide development and validate alternative implementations.
 
+Evaluation framework comes first.
+But maybe I need a skeleton votecounter first.
+Ah, I'll just use what I have. Throwing away old code bad and so on.
+Refactoring must be the name of the game.
+
+Need to find the sequence of small changes that maintain "completeness", add value, and approach the desired end state.
+
