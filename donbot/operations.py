@@ -1,5 +1,6 @@
 from lxml import html
 from lxml.html import HtmlElement
+from math import floor
 import json
 
 
@@ -7,6 +8,7 @@ __all__ = [
     "load_credentials",
     "get_login_form",
     "count_posts",
+    "get_thread_page_urls",
     "get_user_id",
     "get_activity_overview",
     "get_posts",
@@ -22,7 +24,7 @@ def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, s
     Parameters
     ----------
     credentials_path : str, optional
-        The path to the JSON file containing the credentials. 
+        The path to the JSON file containing the credentials.
         Defaults to "credentials.json" if not provided.
 
     Returns
@@ -86,6 +88,38 @@ def count_posts(thread_html: HtmlElement) -> int:
     post_count_path = "(//div[@class='pagination'])[2]/text()"
     numberOfPosts = thread_html.xpath(post_count_path)[0]
     return int(numberOfPosts[: numberOfPosts.find(" ")].strip())
+
+
+def get_thread_page_urls(
+    thread: str, thread_page_html: HtmlElement, start: int, end: int
+) -> list[str]:
+    """
+    Get the URLs of the pages of a thread.
+
+    Parameters
+    ----------
+    thread : str
+        The URL of the thread.
+    thread_page_html : HtmlElement
+        The HTML of a page from the thread.
+    end : int
+        The number of pages to retrieve.
+
+    Returns
+    -------
+    list[str]
+        The URLs of the pages of the thread.
+    """
+    end = end if end != -1 else count_posts(thread_page_html)
+
+    posts_per_page = 25
+    start_page_id = floor(start / posts_per_page) * posts_per_page
+    end_page_id = floor(end / posts_per_page) * posts_per_page
+    
+    return [
+        f"{thread}&start={str(page_id)}"
+        for page_id in range(start_page_id, end_page_id + 1, posts_per_page)
+    ]
 
 
 def get_user_id(user_posts_html: HtmlElement) -> str:

@@ -1,6 +1,5 @@
 from donbot import Donbot
 from donbot.operations import load_credentials
-from datetime import datetime
 import random
 
 single_page_thread = "https://forum.mafiascum.net/viewtopic.php?f=53&t=84030"
@@ -69,17 +68,13 @@ def test_retrieve_all_posts():
 
     assert posts[0]["id"] == "12069063"
     assert posts[0]["user"] == "brighteningskies"
-    assert posts[0]["time"] == datetime.strptime(
-        "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p"
-    )
+    assert posts[0]["time"] == "Sat Aug 22, 2020 7:08 pm"
     assert posts[0]["number"] == 0
     assert "I'll start: it's 1am" in posts[0]["content"]
 
     assert posts[-1]["id"] == "12078076"
     assert posts[-1]["user"] == "Ythan"
-    assert posts[-1]["time"] == datetime.strptime(
-        "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p"
-    )
+    assert posts[-1]["time"] == "Wed Aug 26, 2020 1:21 pm"
     assert posts[-1]["number"] == 14
     assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
 
@@ -94,17 +89,13 @@ def test_get_one_post():
 
     assert posts[0]["id"] == "12069063"
     assert posts[0]["user"] == "brighteningskies"
-    assert posts[0]["time"] == datetime.strptime(
-        "Sat Aug 22, 2020 7:08 pm", "%a %b %d, %Y %I:%M %p"
-    )
+    assert posts[0]["time"] == "Sat Aug 22, 2020 7:08 pm"
     assert posts[0]["number"] == 0
     assert "I'll start: it's 1am" in posts[0]["content"]
 
     assert posts[-1]["id"] == "12078076"
     assert posts[-1]["user"] == "Ythan"
-    assert posts[-1]["time"] == datetime.strptime(
-        "Wed Aug 26, 2020 1:21 pm", "%a %b %d, %Y %I:%M %p"
-    )
+    assert posts[-1]["time"] == "Wed Aug 26, 2020 1:21 pm"
     assert posts[-1]["number"] == 14
     assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
 

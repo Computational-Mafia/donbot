@@ -1,3 +1,4 @@
+from email.mime import base
 from typing import Optional
 from .operations import (
     get_login_form,
@@ -8,9 +9,9 @@ from .operations import (
     get_make_post_form,
     get_edit_post_form,
     get_send_pm_form,
+    get_thread_page_urls,
 )
 from lxml import html
-from math import floor
 from requests import Session
 import time
 
@@ -157,22 +158,49 @@ class Donbot:
         thread = thread or self.thread
         if len(thread) == 0:
             raise ValueError("No thread specified!")
-        end = end if end != -1 else self.count_posts(thread)
+        base_html = html.fromstring(self.session.get(thread).content)
 
-        # identify pages to visit
-        posts_per_page = 25
-        start_page_id = floor(start / posts_per_page) * posts_per_page
-        end_page_id = floor(end / posts_per_page) * posts_per_page
-
-        # visit pages to extract applicable posts
         posts = []
-        for page_id in range(start_page_id, end_page_id + 1, posts_per_page):
+        for thread_page_url in get_thread_page_urls(thread, base_html, start, end):
             thread_page_html = html.fromstring(
-                self.session.get(f"{thread}&start={str(page_id)}").content
+                self.session.get(thread_page_url).content
             )
             posts += get_posts(thread_page_html, start, end)
 
         return posts
+    
+    def get_user_posts(
+            self, thread: Optional[str] = None, user: Optional[str] = None
+    ):
+        """
+        Gets the posts of the specified user in the specified thread.
+
+        Parameters
+        ----------
+        thread : str, optional
+            The thread to get posts from.
+        user : str, optional
+            The user to get posts from.
+
+        Returns
+        -------
+        list
+            The posts of the specified user in the specified thread.
+        """
+        thread = thread or self.thread
+        user = user or self.username
+        if len(thread) == 0:
+            raise ValueError("No thread specified!")
+        user_id = self.get_user_id(user)
+        user_iso_url = f"{thread}&user_select%5B%5D={user_id}"
+        base_html = html.fromstring(self.session.get(user_iso_url).content)
+
+        posts = []
+        for user_iso_page_url in get_thread_page_urls(user_iso_url, base_html, 0, -1):
+            user_iso_page_html = html.fromstring(
+                self.session.get(user_iso_page_url).content
+            )
+            posts += get_posts(user_iso_page_html)
 
     def get_post(self, post_number: int = 0, thread: Optional[str] = None) -> dict:
         """
