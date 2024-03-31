@@ -85,7 +85,7 @@ def count_posts(thread_html: HtmlElement) -> int:
     int
         The number of posts in the specified thread.
     """
-    post_count_path = "(//div[@class='pagination'])[2]/text()"
+    post_count_path = "(//div[@class='pagination'])/text()"
     numberOfPosts = thread_html.xpath(post_count_path)[0]
     return int(numberOfPosts[: numberOfPosts.find(" ")].strip())
 
@@ -191,6 +191,7 @@ def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assig
     """
     post_number_path = ".//span[@class='post-number-bolded']//text()"
     post_user_path = ".//a[@class='username' or @class='username-coloured']/text()"
+    post_user_id_path = ".//a[@class='username' or @class='username-coloured']/@href"
     post_content_path = ".//div[@class='content']"
     post_timestamp_path = ".//p[@class='author modified']/text()"
     post_id_path = ".//a/@href"
@@ -200,6 +201,8 @@ def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assig
     post["id"] = post_html.xpath(post_id_path)[0]
     post["id"] = post["id"][post["id"].rfind("#") + 2 :]
     post["user"] = post_html.xpath(post_user_path)[0]
+    post["user_id"] = post_html.xpath(post_user_id_path)[0]
+    post["user_id"] = post["user_id"][post["user_id"].rfind("=") + 1 :]
     post["content"] = html.tostring(post_html.xpath(post_content_path)[0])
     post["content"] = post["content"].decode("UTF-8").strip()[21:-6]
     post["time"] = post_html.xpath(post_timestamp_path)[-1]
