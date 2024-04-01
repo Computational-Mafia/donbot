@@ -207,12 +207,11 @@ def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assig
     post["content"] = post["content"].decode("UTF-8").strip()[21:-6]
     post["time"] = post_html.xpath(post_timestamp_path)[-1]
     post["time"] = post["time"][post["time"].find("» ") + 2 :].strip()
-    # post["time"] = dt.strptime(post["time"], "%a %b %d, %Y %I:%M %p")
     return post
 
 
 def get_posts(
-    thread_page_html: HtmlElement, start: int = 0, end: int = -1
+    thread_page_html: HtmlElement, start: int = 0, end: int|float = -1
 ) -> list[dict]:
     """
     Retrieve posts from a thread.
@@ -232,12 +231,11 @@ def get_posts(
         Each post's data, including post `id`, `number`, `user, `time`, and `content`.
     """
     posts = []
-    end = end if end != -1 else count_posts(thread_page_html)
+    end = end if end != -1 else float('inf')
     for raw_post in thread_page_html.xpath("//div[@class='postbody']"):
         post = get_post(raw_post)
-        if post["number"] < start or post["number"] > end:
-            continue
-        posts.append(post)
+        if post["number"] >= start and post["number"] <= end:
+            posts.append(post)
     return posts
 
 

@@ -1,0 +1,2 @@
+# Thread Index Generator
+In mafia games on mafiascum.net and other large threads, keeping track of vital posts like votecounts and phase changes is essential but cumbersome. Players often rely on manually curated indexes in the opening post (OP), which can be inefficient and time-consuming to maintain. The MafiaScum Index Creator automates this task by generating and updating a table of contents for key game events. Users simply specify the thread and designate a post for the index, and the tool handles the rest, ensuring easy and fast access to important game information.
