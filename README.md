@@ -10,7 +10,7 @@ For game moderators, the library can be used to automate the process of updating
 
 ## Implemented Utilities 📋
 
-Using donbot, we've already automated a number of common workflows on mafiascum.net and host them in Google Colaboratory notebooks. These can be executed in the cloud without any setup, making them accessible even to people who don't write code. Just click the "Open in Colab" button next to a utility to get srated. Here's a table of what we have so far:
+Using donbot, we've already automated a number of common workflows on mafiascum.net and host them in Google Colaboratory notebooks. These can be executed in the cloud without any setup, making them accessible even to people who don't write code. Just click the "Open in Colab" button next to a utility to get started. Here's a table of what we have so far:
 
 | Utility | Description  | Open in Colab | Notes |
 | --- | --- | --- | --- |
