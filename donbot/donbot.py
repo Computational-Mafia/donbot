@@ -1,4 +1,3 @@
-from email.mime import base
 from typing import Optional
 from .operations import (
     get_login_form,
@@ -192,7 +191,7 @@ class Donbot:
         if len(thread) == 0:
             raise ValueError("No thread specified!")
         user_id = self.get_user_id(user)
-        user_iso_url = f"{thread}&user_select%5B%5D={user_id}"
+        user_iso_url = f"{thread}&ppp=25&user_select%5B%5D={user_id}"
         base_html = html.fromstring(self.session.get(user_iso_url).content)
 
         posts = []
