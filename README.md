@@ -14,6 +14,7 @@ Using donbot, we've already automated a number of common workflows on mafiascum.
 
 | Utility | Description  | Open in Colab | Notes |
 | --- | --- | --- | --- |
+| Thread Table of Contents Generator | Generates a table of contents for a thread's key posts | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Computational-Mafia/donbot/blob/master/examples/thread_toc/thread_toc.ipynb) | Needs some knowledge of HTML xpathing |
 | Youtube Playlist Extractor | Extracts YouTube video links from a thread and compiles them into a playlist | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Computational-Mafia/donbot/blob/f288643e18552e6768d7c7b4b9cfc943cdce61a5/examples/youtube_playlist_extraction/Youtube_Playlist_Extractor.ipynb) | Tested for threads with ~50 videos |
 | Thread Scraping | Uses scrapy to download a thread's posts into a structured JSONL file | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Computational-Mafia/donbot/blob/master/examples/thread_scraping/Thread_Scraping.ipynb) | Modify or see full example for multi-thread scraping. |
 
