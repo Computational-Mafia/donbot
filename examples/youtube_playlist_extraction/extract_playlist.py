@@ -1,4 +1,4 @@
-from donbot.operations import get_posts
+from donbot.operations import get_posts, get_thread_page_urls
 import requests
 from lxml import html
 
@@ -24,22 +24,26 @@ def create_playlist_url(video_links: list[str]):
 
 
 if __name__ == "__main__":
-    thread = "https://forum.mafiascum.net/viewtopic.php?t=92203" # @param {type:"string"}
-    playlist_type = "music" # @param ["music", "regular videos"]
+    thread = "https://forum.mafiascum.net/viewtopic.php?t=91822" # @param {type:"string"}
+    playlist_type = "regular videos" # @param ["music", "regular videos"]
 
     session = requests.Session()
-    thread_page_html = html.fromstring(session.get(thread).content)
-    posts = get_posts(thread_page_html)
-    youtube_links = []
-    for post in posts:
-        if post["user"] != posts[0]["user"]:
-            continue
+    thread_html = html.fromstring(session.get(thread).content)
+    thread_urls = get_thread_page_urls(thread, thread_html)
 
-        youtube_links.extend(extract_youtube_links(post["content"]))
-
+    posts = []
+    for thread_url in thread_urls:
+        thread_page_html = html.fromstring(session.get(thread_url).content)
+        posts.extend(get_posts(thread_page_html))
+    
+    assert(len(posts) >= 144)
+    first_user_contents = [post["content"] for post in posts if post["user"] == posts[0]["user"]]
+    youtube_links = sum(
+        (extract_youtube_links(content) for content in first_user_contents), []
+    )
     playlist_url = create_playlist_url(youtube_links)
     final_playlist_url = session.get(playlist_url).url
-    
+
     print('Playlist URL:')
     if playlist_type == 'music':
         print(final_playlist_url.replace('www', 'music'))

@@ -85,13 +85,15 @@ def count_posts(thread_html: HtmlElement) -> int:
     int
         The number of posts in the specified thread.
     """
-    post_count_path = "(//div[@class='pagination'])/text()"
-    numberOfPosts = thread_html.xpath(post_count_path)[0]
-    return int(numberOfPosts[: numberOfPosts.find(" ")].strip())
+    post_count_path = "//div[@class='pagination']/text()"
+    post_count_element = next(
+        el for el in thread_html.xpath(post_count_path) if el.strip()
+    )
+    return int("".join([c for c in post_count_element if c.isdigit()]))
 
 
 def get_thread_page_urls(
-    thread: str, thread_page_html: HtmlElement, start: int, end: int
+    thread: str, thread_page_html: HtmlElement, start: int = 0, end: int = -1
 ) -> list[str]:
     """
     Get the URLs of the pages of a thread.
@@ -115,7 +117,7 @@ def get_thread_page_urls(
     posts_per_page = 25
     start_page_id = floor(start / posts_per_page) * posts_per_page
     end_page_id = floor(end / posts_per_page) * posts_per_page
-    
+
     return [
         f"{thread}&start={str(page_id)}"
         for page_id in range(start_page_id, end_page_id + 1, posts_per_page)
@@ -211,7 +213,7 @@ def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assig
 
 
 def get_posts(
-    thread_page_html: HtmlElement, start: int = 0, end: int|float = -1
+    thread_page_html: HtmlElement, start: int = 0, end: int | float = -1
 ) -> list[dict]:
     """
     Retrieve posts from a thread.
@@ -231,7 +233,7 @@ def get_posts(
         Each post's data, including post `id`, `number`, `user, `time`, and `content`.
     """
     posts = []
-    end = end if end != -1 else float('inf')
+    end = end if end != -1 else float("inf")
     for raw_post in thread_page_html.xpath("//div[@class='postbody']"):
         post = get_post(raw_post)
         if post["number"] >= start and post["number"] <= end:

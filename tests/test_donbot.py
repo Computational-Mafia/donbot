@@ -3,8 +3,9 @@ from donbot.operations import load_credentials
 import random
 
 single_page_thread = "https://forum.mafiascum.net/viewtopic.php?f=53&t=84030"
-test_post_thread = "https://forum.mafiascum.net/viewtopic.php?t=12551"
+multi_page_thread = "https://forum.mafiascum.net/viewtopic.php?t=83530"
 unread_posts_thread = "https://forum.mafiascum.net/viewtopic.php?t=84934"
+test_post_thread = "https://forum.mafiascum.net/viewtopic.php?t=12551"
 
 
 def test_credentials_exist():
@@ -23,6 +24,14 @@ def test_count_posts():
     username, password = load_credentials()
     donbot = Donbot(username, password)
     assert donbot.count_posts(single_page_thread) == 15
+
+
+def test_count_posts_in_multi_page_thread():
+    "Donbot should be able to count posts in a multi-page thread"
+
+    username, password = load_credentials()
+    donbot = Donbot(username, password)
+    assert donbot.count_posts(multi_page_thread) == 351
 
 
 def test_count_posts_in_unread_thread():
@@ -77,6 +86,16 @@ def test_retrieve_all_posts():
     assert posts[-1]["time"] == "Wed Aug 26, 2020 1:21 pm"
     assert posts[-1]["number"] == 14
     assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
+
+
+def test_retrieve_all_posts_in_multipage_thread():
+    "Donbot should be able to retrieve all posts in a multi-page thread"
+
+    username, password = load_credentials()
+    donbot = Donbot(username, password)
+
+    posts = donbot.get_posts(multi_page_thread)
+    assert len(posts) == donbot.count_posts(multi_page_thread)
 
 
 def test_get_one_post():
