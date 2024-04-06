@@ -11,6 +11,7 @@ import os
 
 posts_per_page = 25
 archive_path = "../../data/archive.txt"
+output_path = "../../data/posts.jsonl"
 
 class PostItem(scrapy.Item):
     number = scrapy.Field()
@@ -29,7 +30,7 @@ class PostItem(scrapy.Item):
 class JsonWriterPipeline(object):
     # operations performed when spider starts
     def open_spider(self, spider):
-        self.file = open("posts.jsonl", "w")
+        self.file = open(output_path, "a")
 
     # when the spider finishes
     def close_spider(self, spider):
