@@ -46,5 +46,4 @@ Votecounter steps:
         - Save the votelog to a file
 
 Scratch:
-
     It looks like I can eitehr try to keep going with the current test function and refactor later, or I can try to refactor now.

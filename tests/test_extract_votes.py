@@ -1,4 +1,4 @@
-from donbot.vote_counting.vote_extracter import get_vote_strings
+from donbot.vc.vote_extracter import get_vote_strings
 from lxml import html
 
 

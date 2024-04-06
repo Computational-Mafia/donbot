@@ -1,7 +1,7 @@
 import pytest
-from donbot.vote_counting import vote_extracter
+from donbot.vc import vote_extracter
 from donbot.data_loading import PhaseDataset
-from donbot.vote_counting.vote_count import VoteCount
+from donbot.vc.vote_count import VoteCount
 
 archive_path = "data/archive.txt"
 transitions_path = "data/transitions.tsv"

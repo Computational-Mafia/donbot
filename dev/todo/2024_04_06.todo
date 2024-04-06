@@ -1,0 +1,25 @@
+Design constraints for votecounter.
+
+User story:
+    - Someone provides slot information, special events, start_point, end_point, and a thread url.
+    - We retrieve posts, initialize votecount and votecounter.
+    - Then we process each post, and update the votecount and votecounter.
+
+High-Level Separation of Concerns for an Integrated Votecounter class:
+    - Parametrization
+    - Initialization -- Initialize a votecount and voteextractor instance
+    - Processing -- Process each post and update the votecount and votecounter
+    - Event handling -- Handle special events and update the votecount and votecounter
+    - Halting -- Halt the processing and return the votecount and votecounter
+    - Output -- Return the final votecount instance
+    - Post-processing -- Complete task using data inside the votecount instance
+
+Components:
+    - Client parametrizes and deals with post-processing
+    - Separate votecount class for representing and updating the votecount
+    - Separate voteextractor class for extracting votes from posts
+    - Wrapper votecounter class for initializing, processing, and halting the votecount and voteextractor given posts, etc.
+
+So what now?:
+    I have the skeleton for the vote extractor class and the entire votecount object. 
+    I should probably implement the votecounter class next.

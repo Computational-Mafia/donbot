@@ -1,0 +1,32 @@
+Library features:
+    - Check for new PMs
+        Mostly needed for testing send_pm. Not clearly useful for research.
+    - user_id getter that doesn't requirement a post number or authentication
+    - Use pprint inside URL to make scraping more efficient
+
+Use cases to support:
+    - Votecounting
+    - VCA helper
+    - Page topper
+    - Think about what else I might want to do with the bot
+
+Development Flow:
+    - Can I make providing a new release easier?
+        Right now it's a separate step beyond pushing the code to the repo.
+    - Can I make syncing colab notebooks and library easier?
+        Right now, I update the script and then copy it into the colab notebook.
+    - Should I integrate client-facing functions into the library, including tests?
+        It might help make sure that client code is always up-to-date with the library.
+
+Documentation for Users, Developers, Contributors:
+    - Plan a docsite with a minimal API reference. Or just a demo notebook.
+    - Document how to make a new release; developer guide? Contribution guide.
+    - Start a changelog
+    - Commit to semantic commit messages
+
+Decisions:
+    ✔ How much votecounter development goes into donbot? @20m @started(24-02-18 22:13) @done(24-02-18 22:22) @lasted(9m28s)
+        All of it, but not the research project itself.
+
+Human Tasks:
+    - New release
