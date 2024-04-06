@@ -1,0 +1,50 @@
+How will the application normally look?
+
+Someone provides slot information, special events, start_point, end_point, and a thread url.
+We retrieve posts, initialize votecount and votecounter.
+Then we process each post, and update the votecount and votecounter.
+
+Once all posts have been processed or a halt condition is met, we output the votecount and the votelog and any other relevant information.
+
+So it looks like a lot of my testing code needs to be library code -- a function that takes applicable parameters and returns a processed votecount object, in particular, and any further reusable post-processing code.
+
+Basically everything starting from votecounter initialization so far. 
+
+High-Level:
+    We could though imagine combining votecount and votecounter into a single object. 
+    But I think I prefer a separation of concerns.
+
+    - Vote parser (extracting vote information from a post)
+        Vote parser's main class is VoteParser, which has a method parse_vote(post) that returns a vote object.
+    - Votecount (vote tabulation logic)
+        Votecount's main class is Votecount, which has a method update(vote) that updates the votecount.
+    - Vote counter (parsing a set of posts to get a votecount)
+        Vote counter's main class is VoteCounter, which has a method process_posts(posts) that processes a set of posts and returns a votecount object.
+
+Votecounter steps:
+
+    This stuff about parsing special events seems best handled by the votecount object, but parsing notes to parametrize these special events seems best handled by the votecounter object.
+
+    Initial non-steps:
+        ✔ Load the phase data @done(24-04-05 21:49)
+            Loading data and configuring parameters is application-level, including work to validate the votecounter and extract a dataset for the great vca.
+            I'll need to figure out what the needed parameters are
+        - Pass phase data as argument to the votecounter object
+        
+    Steps:
+        - Initialize a votecount and voteextractor instance
+        - Process each post
+        - Handle special events in the post (killed, reset, voted, hammers, etc)
+        - Update the votecount with votes detected in the post
+        - Stop updating votecount if a halt condition is met
+        - Output the votecount and votelog
+
+    Later non-steps:
+        - Check if the votecounter object has the correct player as the lynch target
+        - Scan for the next moderator post to predict the transition
+        - Raise an error if the prediction should have been made but wasn't
+        - Save the votelog to a file
+
+Scratch:
+
+    It looks like I can eitehr try to keep going with the current test function and refactor later, or I can try to refactor now.

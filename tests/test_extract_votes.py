@@ -1,10 +1,10 @@
-from donbot.get_votes import get_votes
+from donbot.vote_counting.vote_extracter import get_vote_strings
 from lxml import html
 
 
-def test_get_votes_from_minimal_post():
+def test_find_votes_in_minimal_post():
     post = html.fromstring(
         """<div style=\"display:inline;font-weight:bold\">vote: Hinduragi</div>"""
     )
-    votes = get_votes(post)
+    votes = list(get_vote_strings(post))
     assert votes == ["Hinduragi"]

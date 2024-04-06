@@ -1,0 +1,64 @@
+So the votecounter has two big components. Maybe 3. 
+- The function that processes posts and returns any detected votes
+- The function that maintains a votecounter object and updates it with new votes, returns a formatted votecount, etc.
+- The pipeline that runs the votecounter on all posts and updates the votecounter object with the results.
+- Also, the pipeline that validates the performance of my votecounter by running it on a test set of posts and comparing the results to the actual votes.
+- There's also the evaluation run that tries to predict the outcome of each Day phase (and game) based on extracted votes.
+
+The latter two differ in how they test the votecounter. The first involves defining a set of test cases for the votecounter to always pass in principle. The second is a more general test of the votecounter's performance over a sample dataset. It might inform development of new test cases or the votecounter.
+
+My theory is that one of the big factors slowing down votecoutner development was a failure to see the importance of defining and automatically evaluating concrete test cases. Instead, I just kept running the global validation framework, inspecting failures, changing my votecounter, and running it again. This was a slow and inefficient process and didn't create knowledge about votecounter constraints that could be used to guide development and validate alternative implementations.
+
+Evaluation framework comes first.
+But maybe I need a skeleton votecounter first.
+Ah, I'll just use what I have. Throwing away old code bad and so on.
+Refactoring must be the name of the game.
+
+Need to find the sequence of small changes that maintain "completeness", add value, and approach the desired end state.
+
+To start, I can add a basic post processor (or include the one I have), and implement tests for really straightforward cases: Exact name matches, correct tags, no text, no other votes
+
+In fact, the test comes first.
+
+Assuming an html element helps ensure that invalid inputs are rejected immediately. 
+But I definitely prefer to make sure html-specific operations are separate from the core logic of vote extraction.
+
+I'm seeing three levels.
+One for extracting relevant text from html.
+One for detecting vote tags (as well as broken tags) in the text.
+Another for identifying votes in the tags.
+It's only the last one that will have general applicability outside of mafiascum.net.
+It's essentially a username matching problem.
+I don't necessarily need to separate html aprsing and tag detection; these are both specific to mafiascum.net. 
+But I should separate the username matching from the rest of the votecounter.
+And I already did in old versions.
+
+We'll separately test for each part of the process.
+First, we want to accurately count votes in a post, without identifying the voter.
+
+Okay, we have an initial implementation and test that will at least identify votes inside of bold tags.
+We know from experience that this implementation is not robust, but it's a start.
+Now we need a process for identifying further nonredundant test cases.
+
+That's the votecounter evaluation framework.
+
+What do I do now? I need to implement the evaluation framework.
+Then I can use it to detect errors.
+
+What do I need?
+Votecounter structure for tracking majorities.
+Voteextractor for extracting votes from posts.
+Then loop through game phases...
+Configure votecounter and voteextractor.
+Iteratively update votecounter with votes from posts.
+When majority is reached, compare to observed outcome.
+Record error.
+Ideally...these would each be fossilized in a test case.
+
+Okay. I'll make pytest fixtures that parameterize the votecounter and voteextractor for each day phase across my stored games.
+Then I'll write a test that runs the votecounter on each post and compares the result to the actual phase outcome.
+Running all of these tests will summarize the votecounter's performance over the dataset and identify any errors.
+If I start a practice of further annotating phases with the relevant failure modes that they test for, I can use this to guide development of new test cases and the votecounter itself.
+I can analyze this annotated dataset to identify common failure modes and prioritize development of new test cases.
+
+https://chat.openai.com/c/73fc50e6-f93e-4a57-aea8-3ba2387550c9

@@ -71,59 +71,6 @@ def get_login_form(
     }
 
 
-def count_posts(thread_html: HtmlElement) -> int:
-    """
-    Counts the number of posts in the specified thread.
-
-    Parameters
-    ----------
-    thread_html : HtmlElement
-        The HTML of a page from the thread to count posts in.
-
-    Returns
-    -------
-    int
-        The number of posts in the specified thread.
-    """
-    post_count_path = "//div[@class='pagination']/text()"
-    post_count_element = next(
-        el for el in thread_html.xpath(post_count_path) if el.strip()
-    )
-    return int("".join([c for c in post_count_element if c.isdigit()]))
-
-
-def get_thread_page_urls(
-    thread: str, thread_page_html: HtmlElement, start: int = 0, end: int = -1
-) -> list[str]:
-    """
-    Get the URLs of the pages of a thread.
-
-    Parameters
-    ----------
-    thread : str
-        The URL of the thread.
-    thread_page_html : HtmlElement
-        The HTML of a page from the thread.
-    end : int
-        The number of pages to retrieve.
-
-    Returns
-    -------
-    list[str]
-        The URLs of the pages of the thread.
-    """
-    end = end if end != -1 else count_posts(thread_page_html)
-
-    posts_per_page = 25
-    start_page_id = floor(start / posts_per_page) * posts_per_page
-    end_page_id = floor(end / posts_per_page) * posts_per_page
-
-    return [
-        f"{thread}&start={str(page_id)}"
-        for page_id in range(start_page_id, end_page_id + 1, posts_per_page)
-    ]
-
-
 def get_user_id(user_posts_html: HtmlElement) -> str:
     """
     Retrieve the numeric id that the site uses to identify a user.
@@ -175,6 +122,59 @@ def get_activity_overview(activity_overview_html: HtmlElement) -> list[dict]:
             }
         )
     return userinfo
+
+
+def count_posts(thread_html: HtmlElement) -> int:
+    """
+    Counts the number of posts in the specified thread.
+
+    Parameters
+    ----------
+    thread_html : HtmlElement
+        The HTML of a page from the thread to count posts in.
+
+    Returns
+    -------
+    int
+        The number of posts in the specified thread.
+    """
+    post_count_path = "//div[@class='pagination']/text()"
+    post_count_element = next(
+        el for el in thread_html.xpath(post_count_path) if el.strip()
+    )
+    return int("".join([c for c in post_count_element if c.isdigit()]))
+
+
+def get_thread_page_urls(
+    thread: str, thread_page_html: HtmlElement, start: int = 0, end: int = -1
+) -> list[str]:
+    """
+    Get the URLs of the pages of a thread.
+
+    Parameters
+    ----------
+    thread : str
+        The URL of the thread.
+    thread_page_html : HtmlElement
+        The HTML of a page from the thread.
+    end : int
+        The number of pages to retrieve.
+
+    Returns
+    -------
+    list[str]
+        The URLs of the pages of the thread.
+    """
+    end = end if end != -1 else count_posts(thread_page_html)
+
+    posts_per_page = 25
+    start_page_id = floor(start / posts_per_page) * posts_per_page
+    end_page_id = floor(end / posts_per_page) * posts_per_page
+
+    return [
+        f"{thread}&start={str(page_id)}"
+        for page_id in range(start_page_id, end_page_id + 1, posts_per_page)
+    ]
 
 
 def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assign

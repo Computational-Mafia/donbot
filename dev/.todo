@@ -1,0 +1,48 @@
+I will probably want to ditch the votecounter and gamestate code -- for now.
+
+There's stuff in the votecounter folder about scraping normals, managing votecounts, testng the votecounter, and of course the votecounter itself. I don't want to lose this stuff, and it could be important to include a votecounter with donbot in the future. Maybe I move this stuff to the vca repository for now, and then decide what to do with it later.
+
+The gamestate code is honestly pretty irrelevant to any of my research goals, though it could help with the game simulation objective. I can go ahead and start the repository for that and then decide what to do with it later.
+
+The client code is interesting but can be its own repository too. Donbot provides the base library while the client code provides the interface to the bot. I can go ahead and start the repository for that and then decide what to do with it later.
+
+Alternatively, I could rename "client" as "demo" and then include it in the donbot repository. Depends on how involved the client code gets. It will be pretty involved. So yeah, refactor it out. The library should not have flask as a dependency.
+
+I shouldn't overthink this. I may have the votecounter back in this library once my vca module is robust. And maybe I'll decide it's easier to put application code here instead of in a separate repository. I can always reintegrate it later. For now, slice out whatever isn't a good foundation and tied to current milestones.
+
+✔ Move the votecounter code to the vca repository. @done(24-01-30 12:30)
+✔ Move the gamestate code to a gamestate repository. @done(24-01-30 13:01)
+- Move the client code to a client repository. Actually just rename as "applications" and clean up whatever code is there. @done(24-01-30 13:01)
+
+Now what do we have?
+A Donbot class, a readme, a demo notebook, a pagetopper, and a votecount reader
+
+demo notebook and readme are tiedd to one another
+
+I really like the demo/notebook thing. I can move that to the root the repository and keep it updated.
+
+Next is environment setup. I kind of want to try a more modern approach than before, but not if it's a lot of work. For now, I think I'll just stick with a conda environment. I can always change it later. I need to stop doing new things unless they either have a clear benefit or are easy to do.
+
+✔ Set up a conda environment for donbot. @20m @started(24-01-31 02:03) @done(24-01-31 02:25) @lasted(22m34s)
+
+Bugs:
+    ...
+
+Features:
+    - Check for new PMs
+        Needed for testing the PM sending feature. not a priority.
+    - user_id getter that doesn't requirement a post number or authentication
+    - Add a new release for donbot
+
+Use cases:
+    - Votecounter
+    - VCA helper
+    - Page topper
+
+Documentation:
+    - Aim for a docsite with a minimal API reference. Or just a demo notebook.
+    - Document how to make a new release; developer guide? Contribution guide.
+
+Decisions:
+    ✔ How much votecounter development goes into donbot? @20m @started(24-02-18 22:13) @done(24-02-18 22:22) @lasted(9m28s)
+        All of it, but not the research project itself.
