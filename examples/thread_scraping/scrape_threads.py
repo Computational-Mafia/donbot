@@ -10,7 +10,7 @@ import os
 
 
 posts_per_page = 25
-
+archive_path = "../../data/archive.txt"
 
 class PostItem(scrapy.Item):
     number = scrapy.Field()
@@ -52,9 +52,9 @@ class MafiaScumSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        "Generates scrapy.Request objects for each URL in the 'archive.txt' file."
+        "Generates scrapy.Request objects for each URL in the archive file."
 
-        with open("archive.txt") as f:
+        with open(archive_path) as f:
             urls = [each[: each.find("\n")] for each in f.read().split("\n\n\n")]
         for url in tqdm(urls):
             yield scrapy.Request(url=url, callback=self.request_each_page)
