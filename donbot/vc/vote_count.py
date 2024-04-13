@@ -48,7 +48,7 @@ class VoteCount:
             output[str(voted)] = voters
         return output
 
-    def killplayer(self, killed, postnumber=None):
+    def kill_player(self, killed, postnumber=None):
         self.votelog.append(f'{killed} killed in post {str(postnumber)}')
 
         # get killedslot
