@@ -13,3 +13,6 @@ dependencies:
   - h5py
   - pytest
   - requests
+  - markdown2
+  - editdistance
+  - pyenchant
