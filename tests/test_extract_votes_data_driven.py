@@ -1,7 +1,6 @@
 import pytest
 from donbot.vc.vote_counter import VoteCounter
 from donbot.data_loading import PhaseDataset
-# import markdown2 as md
 
 archive_path = 'data/archive.txt'
 transitions_path = 'data/transitions.tsv'
