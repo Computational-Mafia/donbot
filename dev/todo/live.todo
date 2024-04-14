@@ -14,7 +14,7 @@ Use cases to support:
 Development Flow:
     - Automate new release creation
     - Avoid maintaining notebook and script versions of client code
-    - Add a session_operations module to the library for reusable routines that blend requests and operations
+    - Add a session_operations module to the library for reusable routines that blend requests and operationsP
 
 Documentation:
     - Plan a docsite with a minimal API reference. Or just a demo notebook.
@@ -29,6 +29,8 @@ Tests:
     - Need to ensure test coverage for all donbot functions -- e.g., get_user_posts
     - Maybe tests for key vc operations too (once stable), especially votecount.__str__
     - Complete and pass all tests for the vote parsing function
+
+Before I work out the extra routines module, I should first improve the devops for client code. Maybe focus on their nature as "demos" and relax insistence that they be performant. 
 
 Archive:
   ✔ Update references from "vote extracter" to "vote parser" @done(24-04-13 19:53) @project(Miscellaneous Tasks)

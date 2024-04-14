@@ -1,2 +1,19 @@
 Key problem is that I want exhaustive test cases for the votecounter, but am finding it pretty time-consuming to recapitulate all the possible scenarios.
 
+Current approach?
+I hit an error. 
+I visually compare the votelog against the actual votes to see what went wrong.
+I extract the offending post into a new test case.
+Then I fix the bug and run the test again.
+
+How can I accelerate this process?
+It's probably the process of identifying the offending post that is the most time-consuming.
+Then I manually create a new test case for it. Perhaps I could automate this process?
+That would involve a bit of metaprogramming; not sure if it's worth it.
+
+Maybe a collection of watch variables are enough. 
+I think actually the thing that would help most is an improvement over the votelog that allows me to directly compare moderator-posted votecounts against system-generated votecounts.
+
+And also, of course, to efficiently jump to specific votes to see if they really happened.
+
+An important caveat is to avoid hatchet jobs on the votecounter.

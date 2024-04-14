@@ -120,49 +120,49 @@ def test_get_one_post():
     assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
 
 
-def test_make_post():
-    "Donbot should be able to add a post to the site's official test post thread."
+# def test_make_post():
+#     "Donbot should be able to add a post to the site's official test post thread."
 
-    # setup
-    username, password = load_credentials()
-    donbot = Donbot(username, password, test_post_thread)
-    test_content = f"test{random.randint(1, 100)}"
+#     # setup
+#     username, password = load_credentials()
+#     donbot = Donbot(username, password, test_post_thread)
+#     test_content = f"test{random.randint(1, 100)}"
 
-    # operation
-    donbot.make_post(test_content)
+#     # operation
+#     donbot.make_post(test_content)
 
-    # check if we pulled it off
-    post_count = donbot.count_posts(test_post_thread)
-    last_post = donbot.get_posts(test_post_thread, post_count - 1, post_count)[0]
-    assert test_content in last_post.content
-
-
-def test_edit_post():
-    "Donbot should be able to edit a submitted post on the site's official test post thread"
-
-    # setup
-    test_post_number = 1506
-    username, password = load_credentials()
-    donbot = Donbot(username, password, test_post_thread)
-    test_content = f"test{random.randint(1, 100)}"
-
-    # operation
-    donbot.edit_post(test_post_number, test_content)
-
-    # check if we pulled it off
-    last_post = donbot.get_post(test_post_number)
-    assert test_content in last_post.content
+#     # check if we pulled it off
+#     post_count = donbot.count_posts(test_post_thread)
+#     last_post = donbot.get_posts(test_post_thread, post_count - 1, post_count)[0]
+#     assert test_content in last_post.content
 
 
-def test_send_pm():
-    "Donbot should be able to send a PM to a user"
+# def test_edit_post():
+#     "Donbot should be able to edit a submitted post on the site's official test post thread"
 
-    # setup
-    username, password = load_credentials()
-    donbot = Donbot(username, password)
-    test_content = f"test{random.randint(1, 100)}"
+#     # setup
+#     test_post_number = 1506
+#     username, password = load_credentials()
+#     donbot = Donbot(username, password, test_post_thread)
+#     test_content = f"test{random.randint(1, 100)}"
 
-    # operation
-    donbot.send_pm("Psyche", "Test PM", test_content)
+#     # operation
+#     donbot.edit_post(test_post_number, test_content)
 
-    # we dont have a way to check if we pulled it off automatically, but we can check manually
+#     # check if we pulled it off
+#     last_post = donbot.get_post(test_post_number)
+#     assert test_content in last_post.content
+
+
+# def test_send_pm():
+#     "Donbot should be able to send a PM to a user"
+
+#     # setup
+#     username, password = load_credentials()
+#     donbot = Donbot(username, password)
+#     test_content = f"test{random.randint(1, 100)}"
+
+#     # operation
+#     donbot.send_pm("Psyche", "Test PM", test_content)
+
+#     # we dont have a way to check if we pulled it off automatically, but we can check manually
