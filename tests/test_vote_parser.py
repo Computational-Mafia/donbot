@@ -19,7 +19,6 @@ def test_bold_vote_in_implied_nested_span():
     votes = list(VoteParser(players).from_post({'content': post_content}))
     assert votes == ['Ant_to_the_max']
 
-
 def test_vote_with_misspelled_name():
     players = ['Beefster', 'werewolf555', 'Hiraki', 'Substrike22', 'Antihero', 'Lateralus22', 'caelum', 'boberz', 'Mariyta', 'brokenscraps', 'LordChronos', 'AntB', 'pappums rat', 'Mr Wright', 'Ant_to_the_max', 'Dekes', 'Empking', 'Xtoxm', 'moose200x']
     post_content = '<span class="noboldsig"> Vote: Moos200x </span>'

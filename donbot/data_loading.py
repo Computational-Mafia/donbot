@@ -50,12 +50,15 @@ def get_game_thread(game):
     )
     return link, thread_id
 
+
 def get_game_title(game):
     return game.split("\n")[1]
+
 
 def get_game_id(game):
     title = get_game_title(game)
     return [i for i in title.translate(NO_PUNCTUATION).split() if i.isdigit()][0]
+
 
 def get_moderators(game):
     return game.split("\n")[2][len("Moderator: ") :].split(", ")
@@ -221,16 +224,18 @@ class PhaseDataset:
                     continue
                 start_point = 0 if day == 1 else int(game_transitions[day - 1])
                 self.phases.append((game_id, day, start_point, end_point))
-                self.labels.append(f"Game {game_id}, Day {day}, Thread {get_game_thread(game)[1]}")
+                self.labels.append(
+                    f"Game {game_id}, Day {day}, Thread {get_game_thread(game)[1]}"
+                )
 
     def __len__(self):
         return len(self.phases)
-    
+
     def item_labels(self):
         return self.labels
 
     def __getitem__(self, idx):
-        print(f'{idx} testing...')
+        print(f"{idx} testing...")
         game_id, day, start_point, end_point = self.phases[idx]
         game = find_game_from_id(self.games, game_id)
         game_thread = get_game_thread(game)[1]
@@ -250,13 +255,13 @@ class PhaseDataset:
             "correct": correct,
         }
 
-        phase_data['phase_slots'] = [
+        phase_data["phase_slots"] = [
             slot
             for slot_index, slot in enumerate(phase_data["slots"])
             if phase_data["fates"][slot_index] >= day
         ]
-        phase_data['phase_players'] = []
-        for slot in phase_data['phase_slots']:
-            phase_data['phase_players'] += slot
-        
+        phase_data["phase_players"] = []
+        for slot in phase_data["phase_slots"]:
+            phase_data["phase_players"] += slot
+
         return phase_data

@@ -1,6 +1,8 @@
+from typing import Optional
+
 class VoteCount:
     
-    def __init__(self, slots, meta=None, lessOneForMislynch=False, doublevoters=None):
+    def __init__(self, slots: list[list[str]], meta=Optional[str], lessOneForMislynch: bool =False, doublevoters: Optional[list[str]]=None):
         if meta is None:
             meta = {}
         if doublevoters is None:
@@ -12,7 +14,7 @@ class VoteCount:
         # start votecount with everyone voting no one
 
         self.slots, self.votesByVoter, self.votesByVoted = slots.copy(), [], []
-        for _ in range(len(slots)):
+        for _ in slots:
             self.votesByVoter.append(len(slots))
             self.votesByVoted.append([])
         self.votesByVoted.append(list(range(len(slots)))) # non voters
@@ -21,7 +23,7 @@ class VoteCount:
         self.lessOneForMislynch = lessOneForMislynch
         self.choice, self.votelog, self.meta = None, [], meta
         
-    def __str__(self):
+    def __str__(self) -> str:
         string = ''
         for i in self.votesByVoted.keys():
             voters = [self.slots[voter] for voter in self.votesByVoted[i]]
@@ -34,7 +36,7 @@ class VoteCount:
             string += '\n'
         return string[:-1]
 
-    def todict(self):
+    def todict(self) -> dict:
         output = {}
         for i in range(len(self.votesByVoted)):
             voters = []
@@ -48,7 +50,7 @@ class VoteCount:
             output[str(voted)] = voters
         return output
 
-    def kill_player(self, killed, postnumber=None):
+    def kill_player(self, killed: str, postnumber: Optional[int]=None):
         self.votelog.append(f'{killed} killed in post {str(postnumber)}')
 
         # get killedslot
@@ -73,7 +75,7 @@ class VoteCount:
                 v = self.votesByVoted[i][j]
                 self.votesByVoted[i][j] = v - (v > killedslot)
         
-    def update(self, voter, voted, postnumber=None):
+    def update(self, voter: str, voted: str, postnumber: Optional[int]=None):
         self.votelog.append(f'{voter} voted {voted} in post {str(postnumber)}')
 
         # get voterslot and votedslot
@@ -95,7 +97,7 @@ class VoteCount:
         # if voted has a majority of votes, mark as voters' choice
         self.check_choice(votedslot)
                 
-    def check_choice(self, votedslot):
+    def check_choice(self, votedslot: int):
         
         # only matters if votedslot is a player or NO LYNCH
         if votedslot < len(self.slots) or votedslot == len(self.slots)+1:

@@ -20,6 +20,21 @@ Components:
     - Separate voteextractor class for extracting votes from posts
     - Wrapper votecounter class for initializing, processing, and halting the votecount and voteextractor given posts, etc.
 
+VoteExtractor Components:
+    ✘ Extracting relevant text from html. @cancelled(24-04-06 07:37)
+    - Detecting vote tags (as well as broken tags) in the text without identifying the voted
+    - Identifying the voted slot from contents of relevant text
+
+Optimizing Test Case Extraction:
+    First I run the test. 
+    Usually error is not found until my assert statement at very end of loop.
+    I then manually print the votelog in the debugger.
+    I currently scan through the votelog and the thread for ignored votes.
+    Then I edit a conditional breakpoint to focus on a specific post.
+    Then I step through the code to find a specific error.
+
+    Maybe I can stick to moving the error to my list before interpreting.
+
 So what now?:
     I have the skeleton for the vote extractor class and the entire votecount object. 
     I should probably implement the votecounter class next.

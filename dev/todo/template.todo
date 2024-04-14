@@ -7,11 +7,20 @@ Use Cases:
 Tests:
     Confirm the system works as expected.
 
+Refactorings:
+    Improving the system without changing its behavior.
+
+Devops:
+    Tools and processes used to develop the system.
+
 Bugs:
     Bugs in the system that need to be fixed.
 
 Decisions:
-    Decisions made during the development of the system.
+    Decisions to make for the development of the system.
+
+Tasks:
+    Miscellaneous asks that need to be completed.
     
 Chat Logs:
     Chat logs from the development of the system.

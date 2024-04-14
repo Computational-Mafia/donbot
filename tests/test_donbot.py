@@ -75,17 +75,18 @@ def test_retrieve_all_posts():
     posts = donbot.get_posts(single_page_thread)
     assert len(posts) == donbot.count_posts(single_page_thread)
 
-    assert posts[0]["id"] == "12069063"
-    assert posts[0]["user"] == "brighteningskies"
-    assert posts[0]["time"] == "Sat Aug 22, 2020 7:08 pm"
-    assert posts[0]["number"] == 0
-    assert "I'll start: it's 1am" in posts[0]["content"]
+    assert posts[0].id == "12069063"
+    assert posts[0].user == "brighteningskies"
+    assert posts[0].time == "Sat Aug 22, 2020 7:08 pm"
+    assert posts[0].number == 0
+    assert "I'll start: it's 1am" in posts[0].content
 
-    assert posts[-1]["id"] == "12078076"
-    assert posts[-1]["user"] == "Ythan"
-    assert posts[-1]["time"] == "Wed Aug 26, 2020 1:21 pm"
-    assert posts[-1]["number"] == 14
-    assert "Yul Brynner is cool as fuck." in posts[-1]["content"]
+    # Example assertions for the last post in the list
+    assert posts[-1].id == "12078076"
+    assert posts[-1].user == "Ythan"
+    assert posts[-1].time == "Wed Aug 26, 2020 1:21 pm"
+    assert posts[-1].number == 14
+    assert "Yul Brynner is cool as fuck." in posts[-1].content    
 
 
 def test_retrieve_all_posts_in_multipage_thread():
@@ -104,7 +105,7 @@ def test_get_one_post():
     username, password = load_credentials()
     donbot = Donbot(username, password, single_page_thread)
 
-    posts = [donbot.get_post(0), donbot.get_post(14)]
+    posts = [donbot.get_post(0).to_dict(), donbot.get_post(14).to_dict()]
 
     assert posts[0]["id"] == "12069063"
     assert posts[0]["user"] == "brighteningskies"
@@ -133,7 +134,7 @@ def test_make_post():
     # check if we pulled it off
     post_count = donbot.count_posts(test_post_thread)
     last_post = donbot.get_posts(test_post_thread, post_count - 1, post_count)[0]
-    assert test_content in last_post["content"]
+    assert test_content in last_post.content
 
 
 def test_edit_post():
@@ -150,7 +151,8 @@ def test_edit_post():
 
     # check if we pulled it off
     last_post = donbot.get_post(test_post_number)
-    assert test_content in last_post["content"]
+    assert test_content in last_post.content
+
 
 def test_send_pm():
     "Donbot should be able to send a PM to a user"

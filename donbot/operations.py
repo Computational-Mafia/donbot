@@ -1,36 +1,60 @@
 from lxml import html
 from lxml.html import HtmlElement
 from math import floor
+from dataclasses import dataclass, asdict
 import json
 
 
 __all__ = [
     "load_credentials",
-    "get_login_form",
+    "make_login_form",
     "count_posts",
     "get_thread_page_urls",
     "get_user_id",
     "get_activity_overview",
     "get_posts",
-    "get_make_post_form",
+    "make_submit_post_form",
     "get_edit_post_form",
 ]
+
+@dataclass
+class Post:
+    """Dataclass representing a post on the MafiaScum forum.
+
+    Attributes:
+        number: The post number based on its index within the thread.
+        id: The unique id associated by the forum with the post.
+        user: The name of the user who made the post.
+        user_id: The id number associated by the forum with the user.
+        content: The content of the post (html string)
+        time: The time the post was made (unparsed string)
+        page: The url of the page of the thread containing the post.
+        forum: The id of the forum the post was made in.
+        thread: The url of the thread the post was made in.
+    """
+    number: int
+    id: str
+    user: str
+    user_id: str
+    content: str
+    time: str
+    page: str
+    forum: str
+    thread: str
+
+    def to_dict(self):
+        """Returns the post as a dictionary.
+        """
+        return asdict(self)
 
 
 def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, str]:
     """
-    Loads mafiascum credentials from a JSON file.
+    Returns the username and password at the specified JSON filepath.
 
-    Parameters
-    ----------
-    credentials_path : str, optional
-        The path to the JSON file containing the credentials.
-        Defaults to "credentials.json" if not provided.
-
-    Returns
-    -------
-    tuple[str, str]
-        A tuple containing the username and password loaded from the JSON file.
+    Args:
+        credentials_path:
+            Path to the JSON file containing the credentials; defaults to "credentials.json"
     """
     with open(credentials_path) as file:
         data = json.load(file)
@@ -39,25 +63,15 @@ def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, s
     return username, password
 
 
-def get_login_form(
+def make_login_form(
     login_page_html: HtmlElement, username: str, password: str
 ) -> dict[str, str]:
-    """
-    Extracts the login form data from the login page HTML
+    """Returns a valid form for a POST request to log in the user.
 
-    Parameters
-    ----------
-    login_page_html : HtmlElement
-        The HTML of the login page.
-    username : str
-        The username of the user.
-    password : str
-        The password of the user.
-
-    Returns
-    -------
-    dict
-        The login form data; if passed in a valid POST request, will log the user in.
+    Args:
+        login_page_html: HTML of the login page.
+        username: username of the user.
+        password: password of the user.
     """
     creation_time = login_page_html.xpath("//input[@name='creation_time']/@value")[0]
     form_token = login_page_html.xpath("//input[@name='form_token']/@value")[0]
@@ -72,22 +86,14 @@ def get_login_form(
 
 
 def get_user_id(user_posts_html: HtmlElement) -> str:
-    """
-    Retrieve the numeric id that the site uses to identify a user.
+    """Returns the numeric id that the site uses to identify a user.
 
-    Parameters
-    ----------
-    user_posts_html : HtmlElement
-        The HTML of a page containing search results for a user's posts.
+    Works by extracting the id from the first result of a search for the user's posts.
 
-    Returns
-    -------
-    str
-        The numeric id that the site uses to identify a user.
-
-    Notes
+    Args:
+        user_posts_html: HTML of a page containing search results for a user's posts.
     -----
-    Works by extracting the id from first result.
+    
     """
     user_link_path = "//dt[@class='author']/a/@href"
     user_link = user_posts_html.xpath(user_link_path)[0]
@@ -95,18 +101,10 @@ def get_user_id(user_posts_html: HtmlElement) -> str:
 
 
 def get_activity_overview(activity_overview_html: HtmlElement) -> list[dict]:
-    """
-    Retrieve the activity overview of a thread.
+    """Returns the activity overview of a thread across users.
 
-    Parameters
-    ----------
-    activity_overview_html : HtmlElement
-        The HTML of a page containing the activity overview of a thread.
-
-    Returns
-    -------
-    list[dict]
-        A list of dictionaries containing the activity overview of the thread across users.
+    Args:
+        activity_overview_html: The HTML of a page containing the activity overview of a thread.
     """
     activity_path = "//table/tbody//tr"
     userinfo = []
@@ -125,18 +123,10 @@ def get_activity_overview(activity_overview_html: HtmlElement) -> list[dict]:
 
 
 def count_posts(thread_html: HtmlElement) -> int:
-    """
-    Counts the number of posts in the specified thread.
+    """Returns the number of posts in a specified thread.
 
-    Parameters
-    ----------
-    thread_html : HtmlElement
-        The HTML of a page from the thread to count posts in.
-
-    Returns
-    -------
-    int
-        The number of posts in the specified thread.
+    Args:
+        thread_html: HTML of a page from the thread to count posts in.
     """
     post_count_path = "//div[@class='pagination']/text()"
     post_count_element = next(
@@ -148,22 +138,12 @@ def count_posts(thread_html: HtmlElement) -> int:
 def get_thread_page_urls(
     thread: str, thread_page_html: HtmlElement, start: int = 0, end: int = -1
 ) -> list[str]:
-    """
-    Get the URLs of the pages of a thread.
+    """Returns the URLs of the pages of a thread.
 
-    Parameters
-    ----------
-    thread : str
-        The URL of the thread.
-    thread_page_html : HtmlElement
-        The HTML of a page from the thread.
-    end : int
-        The number of pages to retrieve.
-
-    Returns
-    -------
-    list[str]
-        The URLs of the pages of the thread.
+    Args:
+        thread: URL of the thread.
+        thread_page_html: HTML of a page from the thread.
+        end: number of pages to retrieve.
     """
     end = end if end != -1 else count_posts(thread_page_html)
 
@@ -177,19 +157,12 @@ def get_thread_page_urls(
     ]
 
 
-def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assign
-    """
-    Extracts the data of a post from the post HTML.
+def get_post(post_html: HtmlElement, page_url: str = '') -> Post:  # sourcery skip: merge-dict-assign
+    """Returns the data of a post from the post HTML.
 
-    Parameters
-    ----------
-    post_html : HtmlElement
-        The HTML of a post.
-
-    Returns
-    -------
-    dict
-        The post's data, including post `id`, `number`, `user, `time`, and `content`.
+    Args:
+        post_html: The HTML of a post.
+        page_url: The URL of the page containing the post.
     """
     post_number_path = ".//span[@class='post-number-bolded']//text()"
     post_user_path = ".//a[@class='username' or @class='username-coloured']/text()"
@@ -209,55 +182,41 @@ def get_post(post_html: HtmlElement) -> dict:  # sourcery skip: merge-dict-assig
     post["content"] = post["content"].decode("UTF-8").strip()[21:-6]
     post["time"] = post_html.xpath(post_timestamp_path)[-1]
     post["time"] = post["time"][post["time"].find("» ") + 2 :].strip()
-    return post
+    post["page"] = page_url
+    post["forum"] = page_url[page_url.find("f=") + 2 : page_url.find("&t=")]
+    post["thread"] = page_url[page_url.find("&t=") + 3 : page_url.find("&start")]
+    return Post(**post)
 
 
 def get_posts(
-    thread_page_html: HtmlElement, start: int = 0, end: int | float = -1
-) -> list[dict]:
+    thread_page_html: HtmlElement, start: int = 0, end: int | float = -1, page_url: str = ''
+) -> list[Post]:
     """
-    Retrieve posts from a thread.
+    Returns a sequence of posts from a thread.
 
-    Parameters
-    ----------
-    thread_page_html : HtmlElement
-        The HTML of a page from the thread to retrieve posts from.
-    start : int
-        Lowest post number to retrieve.
-    end : int, optional
-        Highest post number to retrieve.
-
-    Returns
-    -------
-    list[dict]
-        Each post's data, including post `id`, `number`, `user, `time`, and `content`.
+    Args:
+        thread_page_html: HTML of a page from the thread to retrieve posts from.
+        page_url: URL of the page containing the posts.
+        start: Lowest post number to retrieve.
+        end: Highest post number to retrieve.
     """
     posts = []
     end = end if end != -1 else float("inf")
     for raw_post in thread_page_html.xpath("//div[@class='postbody']"):
-        post = get_post(raw_post)
-        if post["number"] >= start and post["number"] <= end:
+        post = get_post(raw_post, page_url)
+        if post.number >= start and post.number <= end:
             posts.append(post)
     return posts
 
 
-def get_make_post_form(
+def make_submit_post_form(
     make_post_page_html: HtmlElement, post_content: str
 ) -> dict[str, str]:
-    """
-    Extracts the form data for making a post from the make post page HTML.
+    """Returns a valid form for a POST request to submit a new post to a thread.
 
-    Parameters
-    ----------
-    make_post_page_html : HtmlElement
-        The HTML of the make post page.
-    post_content : str
-        The content of the post to make.
-
-    Returns
-    -------
-    dict
-        The form data for making a post; if passed in a valid POST request, will make the post.
+    Args:
+        make_post_page_html: HTML of the post submission page.
+        post_content: The content of the post.
     """
     post_form_path = "//input[@name='{}']/@value"
 
@@ -274,20 +233,11 @@ def get_make_post_form(
 def get_edit_post_form(
     edit_post_page_html: HtmlElement, post_content: str
 ) -> dict[str, str]:
-    """
-    Extracts the form data for editing a post from the edit post page HTML.
-
-    Parameters
-    ----------
-    edit_post_page_html : HtmlElement
-        The HTML of the edit post page.
-    post_content : str
-        The content of the post to make.
-
-    Returns
-    -------
-    dict
-        The form data for editing a post; if passed in a valid POST request, will edit the post.
+    """Returns a valid form for a POST request to edit a post.
+    
+    Args:
+        edit_post_page_html: HTML of the edit post page.
+        post_content: The content of the post.
     """
     post_data = {
         "message": post_content,
@@ -312,24 +262,13 @@ def get_send_pm_form(
     content: str,
     subject: str,
 ) -> dict[str, str]:
-    """
-    Extracts the form data for sending a private message from the send pm page HTML.
+    """Returns a valid form for a POST request to send a private message.
 
-    Parameters
-    ----------
-    send_pm_page_html : HtmlElement
-        The HTML of the send pm page.
-    recipient_uids : list[str]
-        User ids for recipient(s) of the private message.
-    content : str
-        The content of the private message.
-    subject : str
-        The subject of the private message.
-
-    Returns
-    -------
-    dict
-        The form data for sending a private message; if passed in a valid POST request, will send the private message.
+    Args:
+        send_pm_page_html: HTML of the send private message page.
+        recipient_uids: The user ids of the recipients.
+        content: The content of the private message.
+        subject: The subject of the private message.
     """
 
     post_data = {

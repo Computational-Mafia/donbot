@@ -1,8 +1,9 @@
 Library features:
-    - Check for new PMs
-        Mostly needed for testing send_pm. Not clearly useful for research.
+    - Check for new PMs (for testing)
     - user_id getter that doesn't requirement a post number or authentication
     - Use pprint inside URL to make scraping more efficient
+    - parse_votes is still pretty immature
+    - Add vote counting operation to Donbot class
 
 Use cases to support:
     - Votecounting
@@ -11,22 +12,54 @@ Use cases to support:
     - Think about what else I might want to do with the bot
 
 Development Flow:
-    - Can I make providing a new release easier?
-        Right now it's a separate step beyond pushing the code to the repo.
-    - Can I make syncing colab notebooks and library easier?
-        Right now, I update the script and then copy it into the colab notebook.
-    - Should I integrate client-facing functions into the library, including tests?
-        It might help make sure that client code is always up-to-date with the library.
+    - Automate new release creation
+    - Avoid maintaining notebook and script versions of client code
+    - Add a session_operations module to the library for reusable routines that blend requests and operations
 
-Documentation for Users, Developers, Contributors:
+Documentation:
     - Plan a docsite with a minimal API reference. Or just a demo notebook.
-    - Document how to make a new release; developer guide? Contribution guide.
-    - Start a changelog
+    - Eventually make docstrings for currently unstable functions in the library
     - Commit to semantic commit messages
 
-Decisions:
-    ✔ How much votecounter development goes into donbot? @20m @started(24-02-18 22:13) @done(24-02-18 22:22) @lasted(9m28s)
-        All of it, but not the research project itself.
+Miscellaneous Tasks:
+    - Add a new release for donbot library
+    - Add code to track gaps in data (including in comparison to archive data onsite)
 
-Human Tasks:
-    - New release
+Tests:
+    - Need to ensure test coverage for all donbot functions -- e.g., get_user_posts
+    - Maybe tests for key vc operations too (once stable), especially votecount.__str__
+    - Complete and pass all tests for the vote parsing function
+
+Archive:
+  ✔ Update references from "vote extracter" to "vote parser" @done(24-04-13 19:53) @project(Miscellaneous Tasks)
+  ✔ Clean out unneeded files from `dev/` subdirectory @done(24-04-13 19:22) @project(Miscellaneous Tasks)
+  ✘ Add useful files from vca project to `dev/` subdirectory @cancelled(24-04-13 19:22) @project(Miscellaneous Tasks)
+  ✔ Add type hints and docstrings to any stable implementations in the library @done(24-04-13 19:12) @project(Documentation)
+  ✘ Document how to make a new release; developer guide? Contribution guide. @cancelled(24-04-13 18:56) @project(Documentation)
+  ✘ Start a changelog @cancelled(24-04-13 18:56) @project(Documentation)
+  ✘ Improve docstring for activity_overview @cancelled(24-04-13 18:56) @project(Documentation)
+  ✔ Should I get rid of the computational mafia organization? @done(24-04-13 19:18) @project(Decisions)
+    Main reason to do it is to ensure people see my contributions to the project when they visit my profile. One option is to have the org host forks of my repositories, I guess. Leave it alone for now...
+  ✔ Is maintaining a game archive in scope? @done(24-04-13 19:18) @project(Decisions)
+    Arguably isn't. And we don't want people put off from cloning by the size of the repo. Could include in "Releases" though...
+    But while archive data is used for testing library functions, it might be useful to maintain the archive -- somewhere at least. Might as well keep it in the same repo until I get that other repo going.
+  ✔ Consider a simpler docstring format for the library @started(24-04-13 17:01) @done(24-04-13 17:04) @lasted(3m40s) @project(Documentation)
+    I can switch to google-style docstrings but fastcore's docments are probably too unconventional. google-style does seem less verbose. let's do it.
+  ✔ Use data types to improve docstrings for functions that operate on or return posts @done(24-04-13 18:37) @project(Documentation)
+  ✔ Should I integrate client-facing functions into the library, including tests? @done(24-04-13 12:08) @project(Decisions)
+    It might help make sure that client code is always up-to-date with the library.
+    But then it also considerably increases the scope of the library.
+    Decision: a separate module for operations on session objects -- that is, for coordinating sequences of requests. Refactor donbot and client code to use this module. Invite users to choose between a functional and OOP interface to the library.
+  ✔ review the client code and see if it's worth it @started(24-04-13 11:54) @done(24-04-13 11:58) @lasted(4m52s) @project(Decisions.Steps)
+  ✘ scrape_threads conveys a clear distinction between client and library code that I want to maintain @cancelled(24-04-13 11:52) @project(Decisions.Steps)
+  ✔ generate-thread_toc has some interesting logic in main function that could be refactored out if i re-use it @done(24-04-13 11:56) @project(Decisions.Steps)
+    In general, the first sequence focuses on finding user_id using a thread url and post number. The second sequence grabs posts from a user iso. Both of these are novel operations that I could see myself re-using in the future.
+  ✔ extract_playlist similarly highlights awkwardness of separating operations from requests @done(24-04-13 11:58) @project(Decisions.Steps)
+    To get posts in a thread, I have to request the initial page of a thread. Then based on the response, generate a list of thread urls for each page. Then request each of those pages to get the posts. This is a common pattern that I could abstract out. Will need to find a naming convention for routines that blend requests and operations. Or just make the pre-existing donbot class more usable for client code.
+  ✔ Decide on strategy for refactoring common patterns in my client code @started(24-04-13 11:59) @done(24-04-13 12:06) @lasted(7m33s) @project(Decisions.Steps)
+  ✔ How about donbot? @done(24-04-13 12:03) @project(Decisions.Steps)
+    Core question is: why don't I already use donbot in my client code? Currently, a username and password are required to use donbot, and some operations assume an authenticated session. I could change this, but it might mess with the security model of the library. 
+    Another issue is that actually loading donbot into a colab notebook is kind of time-consuming. Oh well!
+  ✔ How about a new functional module called "routines" or something? @done(24-04-13 12:06) @project(Decisions.Steps)
+    This module would contain functions that are a blend of requests and operations. Maybe it would take a session as an argument. Perhaps a distinction between session_operations and html_operations would be useful.
+    This could simplify donbot's logic further by moving more session logic into the routines module.

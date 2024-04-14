@@ -1,6 +1,8 @@
 from lxml import html
 from lxml.html import HtmlElement
 from editdistance import eval as dist
+from typing import Iterable
+from ..operations import Post
 
 tag_paths = [
     "/html/body/span[contains(@class, '{}')]",
@@ -47,20 +49,20 @@ def includes_vote(post_html: HtmlElement) -> bool:
     return len(list(find_votes(post_html))) > 0
 
 
-def find_players_contain_vote(vote, players):
+def find_players_contain_vote(vote: str, players: dict[str, str]):
     "Find votes that contain player name"
     return [players[p] for p in players if vote in p]
 
 class VoteParser:
-    def __init__(self, players):
+    def __init__(self, players: Iterable[str]):
         self.players = {p.lower():p for p in players}
 
-    def from_post(self, post):
-        post_html = html.fromstring("<html><body>" + post["content"] + "</body></html>")
+    def from_post(self, post: Post) -> Iterable[str]:
+        post_html = html.fromstring(f"<html><body>{post.content}</body></html>")
         for vote in find_votes(post_html):
             yield self.find_voted(vote)
 
-    def find_voted(self, vote):
+    def find_voted(self, vote: str) -> str:
         lowvote = vote.lower()
 
         substring_matches = find_players_contain_vote(lowvote, self.players)

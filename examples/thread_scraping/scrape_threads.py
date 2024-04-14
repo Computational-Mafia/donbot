@@ -78,13 +78,13 @@ class MafiaScumSpider(scrapy.Spider):
     def process_posts(self, response):
         "Extracts post data from a page of a thread."
         thread_page_html = html.fromstring(response.body)
-        posts = get_posts(thread_page_html)
-        page_link = response.url
-        thread = page_link[page_link.find("&t=") + 3 : page_link.find("&start")]
-        forum = page_link[page_link.find("f=") + 2 : page_link.find("&t=")]
+        posts = get_posts(thread_page_html, response.url)
+        page_url = response.url
+        thread = page_url[page_url.find("&t=") + 3 : page_url.find("&start")]
+        forum = page_url[page_url.find("f=") + 2 : page_url.find("&t=")]
         for post in posts:
             yield PostItem(
-                {"pagelink": page_link, "forum": forum, "thread": thread, **post}
+                {"pagelink": page_url, "forum": forum, "thread": thread, **post.to_dict()}
             )
 
 
