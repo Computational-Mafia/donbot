@@ -1,6 +1,7 @@
 import string
 import os
 import json
+from typing import Any
 
 NO_PUNCTUATION = str.maketrans(
     string.punctuation + string.ascii_letters,
@@ -8,24 +9,24 @@ NO_PUNCTUATION = str.maketrans(
 )
 
 
-def load_game_data(data_path):
+def load_game_data(data_path: str) -> list[str]:
     with open(data_path, encoding="utf-8") as f:
         return f.read().split("\n\n\n")
 
 
-def find_game_from_id(games, game_id):
+def find_game_from_id(games: list, game_id: str) -> str:
     for game in games:
         if get_game_id(game) == game_id:
             return game
     raise ValueError(f"Game with id {game_id} not found in games")
 
 
-def load_posts(posts_path, game_id):
+def load_posts(posts_path: str, game_id: str) -> list[dict[str, str]]:
     with open(os.path.join(posts_path, f"{game_id}.jsonl")) as f:
         return [json.loads(line) for line in f]
 
 
-def load_transitions(data_path):
+def load_transitions(data_path: str) -> dict[str, list[str]]:
     with open(data_path) as f:
         transition_lines = f.read().split("\n")[3:]
 
@@ -37,11 +38,11 @@ def load_transitions(data_path):
     return transitions
 
 
-def get_game_transitions(game, all_transitions):
+def get_game_transitions(game: str, all_transitions) -> list[str]:
     return all_transitions[get_game_id(game)]
 
 
-def get_game_thread(game):
+def get_game_thread(game: str) -> tuple[str, str]:
     link = game[: game.find("\n")]
     thread_id = (
         link[link.find("&t=") + 3 :]
@@ -51,20 +52,20 @@ def get_game_thread(game):
     return link, thread_id
 
 
-def get_game_title(game):
+def get_game_title(game: str) -> str:
     return game.split("\n")[1]
 
 
-def get_game_id(game):
+def get_game_id(game: str) -> str:
     title = get_game_title(game)
     return [i for i in title.translate(NO_PUNCTUATION).split() if i.isdigit()][0]
 
 
-def get_moderators(game):
+def get_moderators(game: str) -> list[str]:
     return game.split("\n")[2][len("Moderator: ") :].split(", ")
 
 
-def get_special_events(game):
+def get_special_events(game: str) -> tuple[bool, dict[str, list[str]]]:
     less_one_for_mislynch = False  # whether one less vote is needed for a mislynch
     events = {}  # events relevant for votecounting that happened on specific posts
 
@@ -87,24 +88,25 @@ def get_special_events(game):
     return less_one_for_mislynch, events
 
 
-def get_player_lines(game):
-    return [
-        line.split(", ") for line in game[game.find("\nPlayers\n") + 9 :].split("\n")
-    ]
+def get_player_lines(game: str) -> list[list[str]]:
+    result = []
+    for line in game[game.find("\nPlayers\n") + 9 :].split("\n"):
+        result.append(line.split(", "))
+    return result
 
 
-def get_players(player_lines):
+def get_players(player_lines: list[list[str]]) -> list[str]:
     players = []
     for line in player_lines:
         players += line[0].split(" replaced ")
     return players
 
 
-def get_slots(player_lines):
+def get_slots(player_lines: list[list[str]]) -> list[list[str]]:
     return [line[0].split(" replaced ") for line in player_lines]
 
 
-def get_doublevoters(player_lines):
+def get_doublevoters(player_lines: list[list[str]]) -> list[list[str]]:
     return [
         line[0].split(" replaced ")
         for line in player_lines
@@ -112,7 +114,7 @@ def get_doublevoters(player_lines):
     ]
 
 
-def get_factions(player_lines):
+def get_factions(player_lines: list[list[str]]) -> dict[str, str]:
     slots = get_slots(player_lines)
     factions = {}
     for line in player_lines:
@@ -127,7 +129,7 @@ def get_factions(player_lines):
     return factions
 
 
-def get_slot_fates(player_lines):
+def get_slot_fates(player_lines: list[list[str]]) -> list[float | int]:
     """
     Extracts last day phase that each slot's vote helped decide the outcome.
     This is the phase they died, minus one if they were day-killed (not lynched).
@@ -143,17 +145,17 @@ def get_slot_fates(player_lines):
     return fates
 
 
-def get_lynches(player_lines):
+def get_lynches(player_lines: list[list[str]]) -> dict[str, list[str]]:
     slots = get_slots(player_lines)
     lynched = {}
     for line in player_lines:
         if "lynched" in line[-1].lower():
             fate_phase = int(line[-1][line[-1].rfind(" ") + 1 :])
-            lynched[fate_phase] = slots[-1]
+            lynched[fate_phase] = [s for s in slots if line[0].split(" replaced ") == s][0]
     return lynched
 
 
-def parse_game_info(game, all_transitions):
+def parse_game_info(game: str, all_transitions) -> dict[str, Any]:
     player_lines = get_player_lines(game)
     lessOneForMislynch, events = get_special_events(game)
     game_id = get_game_id(game)
@@ -174,9 +176,10 @@ def parse_game_info(game, all_transitions):
     }
 
 
-def get_prediction_target(game, day):
+def get_prediction_target(game: str, day: int) -> tuple[bool, bool, str | list[str]]:
     canPredictTransition, canPredictLynch = True, True
-    lynched = get_lynches(game)
+    player_lines = get_player_lines(game)
+    lynched = get_lynches(player_lines)
 
     if (
         f"d{day} long twilight"
@@ -207,7 +210,11 @@ def get_prediction_target(game, day):
 
 class PhaseDataset:
     def __init__(
-        self, game_archive_path, transitions_path, posts_path, include_hand_labels=True
+        self,
+        game_archive_path: str,
+        transitions_path: str,
+        posts_path: str,
+        include_hand_labels: bool = True,
     ):
         self.posts_path = posts_path
         self.include_hand_labels = include_hand_labels
@@ -222,19 +229,19 @@ class PhaseDataset:
                 day = day_index + 1
                 if len(game_transitions) < day + 1:
                     continue
-                start_point = 0 if day == 1 else int(game_transitions[day - 1])
+                start_point = 0 if day == 1 else int(game_transitions[day - 2])
                 self.phases.append((game_id, day, start_point, end_point))
                 self.labels.append(
                     f"Game {game_id}, Day {day}, Thread {get_game_thread(game)[1]}"
                 )
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.phases)
 
-    def item_labels(self):
+    def item_labels(self) -> list[str]:
         return self.labels
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> dict:
         print(f"{idx} testing...")
         game_id, day, start_point, end_point = self.phases[idx]
         game = find_game_from_id(self.games, game_id)
