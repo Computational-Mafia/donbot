@@ -2,7 +2,6 @@ from lxml import html
 from lxml.html import HtmlElement
 from editdistance import eval as dist
 from typing import Iterable
-from ..operations import Post
 
 tag_paths = [
     "/html/body/span[contains(@class, '{}')]",
@@ -39,9 +38,14 @@ def find_votes(post_html: HtmlElement):
     )
     for element in matched_elements:
         v = element.text_content().lstrip()
-        # if v[:7].lower().count("vote") + v[:7].lower().count("veot") > 0:
-        if v[:4].lower() == "vote":
-            yield v[4:].replace(':', ' ').rstrip().lstrip()
+        
+        # the latest vote or unvote is the only one that counts
+        vote_location = v.lower().rfind("vote")
+        unvote_location = v.lower().rfind("unvote")
+        if unvote_location > -1 and unvote_location == vote_location - 2:
+            yield 'UNVOTE'
+        elif vote_location > -1:
+            yield v[vote_location + 4:].replace(':', ' ').rstrip().lstrip()
 
 
 def includes_vote(post_html: HtmlElement) -> bool:
@@ -57,12 +61,16 @@ class VoteParser:
     def __init__(self, players: Iterable[str]):
         self.players = {p.lower():p for p in players}
 
-    def from_post(self, post: Post) -> Iterable[str]:
-        post_html = html.fromstring(f"<html><body>{post.content}</body></html>")
+    def from_post(self, post_content: str) -> Iterable[str]:
+        post_html = html.fromstring(f"<html><body>{post_content}</body></html>")
         for vote in find_votes(post_html):
             yield self.find_voted(vote)
 
     def find_voted(self, vote: str) -> str:
+
+        if vote == "UNVOTE":
+            return "UNVOTE"
+        
         lowvote = vote.lower()
 
         substring_matches = find_players_contain_vote(lowvote, self.players)
