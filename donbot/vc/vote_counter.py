@@ -26,25 +26,25 @@ class VoteCounter:
     def choice(self) -> str | list[str] | None:
         return self.votecount.choice
     
-    def process_post(self, post: Post):
+    def process_post(self, post_user: str, post_content: str, post_number: int):
         "Parse and update from events and any votes from a post."
-        self.process_events(post)
-        self.process_votes(post)
+        self.process_events(post_number)
+        self.process_votes(post_user, post_content, post_number)
 
-    def process_votes(self, post: Post):
+    def process_votes(self, post_user: str, post_content: str, post_number: int):
         "Parse and update from votes in a post."
         if not self.choice:
-            if post.user not in self.players:
+            if post_user not in self.players:
                 return
-            for voted in self.vote_parser.from_post(post):
-                self.update_vote(post.user, voted, post.number)
+            for voted in self.vote_parser.from_post(post_content):
+                self.update_vote(post_user, voted, post_number)
 
-    def process_events(self, post: Post):
+    def process_events(self, post_number: int):
         "Parse and update from events tied to a post."
-        if post.number not in self.events:
+        if post_number not in self.events:
             return
-        for event in self.events[post.number]:
-            self.process_event(event, post.number)
+        for event in self.events[post_number]:
+            self.process_event(event, post_number)
 
     def process_event(self, event: str, post_number: int):
         "Parse and update from a single event tied to a post."
