@@ -59,7 +59,7 @@ def find_players_contain_vote(vote: str, players: dict[str, str]):
 
 class VoteParser:
     def __init__(self, players: Iterable[str]):
-        self.players = {p.lower():p for p in players}
+        self.players = {'no lynch': "NO LYNCH", **{p.lower():p for p in players}}
 
     def from_post(self, post_content: str) -> Iterable[str]:
         post_html = html.fromstring(f"<html><body>{post_content}</body></html>")
