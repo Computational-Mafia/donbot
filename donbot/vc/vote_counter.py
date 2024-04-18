@@ -1,6 +1,5 @@
 from .vote_count import VoteCount
 from .vote_parser import VoteParser
-from ..operations import Post
 
 
 def get_players(slots: list[str]) -> list[str]:
@@ -11,13 +10,20 @@ def get_players(slots: list[str]) -> list[str]:
 
 
 class VoteCounter:
-    def __init__(self, slots: list, events=None, lessOneForMislynch=False, doublevoters=None):
+    def __init__(
+        self,
+        slots: list,
+        events=None,
+        lessOneForMislynch=False,
+        doublevoters=None,
+        flag_unmatched_votes=False,
+    ):
         self.events = events or {}
         self.doublevoters = doublevoters or []
         self.slots = slots
         self.players = get_players(slots)
 
-        self.vote_parser = VoteParser(self.players)
+        self.vote_parser = VoteParser(self.players, flag_unmatched_votes)
         self.votecount = VoteCount(
             slots, lessOneForMislynch=lessOneForMislynch, doublevoters=doublevoters
         )
@@ -25,7 +31,7 @@ class VoteCounter:
     @property
     def choice(self) -> str | list[str] | None:
         return self.votecount.choice
-    
+
     def process_post(self, post_user: str, post_content: str, post_number: int):
         "Parse and update from events and any votes from a post."
         self.process_events(post_number)

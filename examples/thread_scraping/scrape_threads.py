@@ -1,3 +1,4 @@
+from re import split
 import scrapy
 import math
 import logging
@@ -8,18 +9,19 @@ from donbot.operations import count_posts, get_posts
 from tqdm import tqdm
 import os
 
-
 posts_per_page = 25
-archive_path = "../../data/archive.txt"
-output_path = "../../data/posts.jsonl"
+archive_path = "data/archive.txt"
+output_path = "data/posts.jsonl"
+split_output_path = "data/posts/"
 
 class PostItem(scrapy.Item):
     number = scrapy.Field()
     id = scrapy.Field()
     user = scrapy.Field()
+    user_id = scrapy.Field()
     content = scrapy.Field()
     time = scrapy.Field()
-    pagelink = scrapy.Field()
+    page = scrapy.Field()
     forum = scrapy.Field()
     thread = scrapy.Field()
 
@@ -45,8 +47,6 @@ class JsonWriterPipeline(object):
 
 class MafiaScumSpider(scrapy.Spider):
     name = "mafiascum"
-
-    # settings
     custom_settings = {
         "LOG_LEVEL": logging.WARNING,
         "ITEM_PIPELINES": {"__main__.JsonWriterPipeline": 1},
@@ -78,14 +78,9 @@ class MafiaScumSpider(scrapy.Spider):
     def process_posts(self, response):
         "Extracts post data from a page of a thread."
         thread_page_html = html.fromstring(response.body)
-        posts = get_posts(thread_page_html, response.url)
-        page_url = response.url
-        thread = page_url[page_url.find("&t=") + 3 : page_url.find("&start")]
-        forum = page_url[page_url.find("f=") + 2 : page_url.find("&t=")]
+        posts = get_posts(thread_page_html, page_url=response.url)
         for post in posts:
-            yield PostItem(
-                {"pagelink": page_url, "forum": forum, "thread": thread, **post.to_dict()}
-            )
+            yield PostItem(**post.to_dict())
 
 
 if __name__ == "__main__":
@@ -95,22 +90,22 @@ if __name__ == "__main__":
     process.start()
 
     # Separate Results into Unique Files
-    posts = open("posts.jsonl")
+    posts = open(output_path)
     for post in posts:
-        with open(f"posts/{json.loads(post)['thread']}.jsonl", "a") as f:
+        with open(f"{split_output_path}{json.loads(post)['thread']}.jsonl", "a") as f:
             f.write(post)
 
     # Clean Up Results
     # Remove duplicate entries and sort by post number for every scraped game.
     # loop through every file in directory
-    for path, subdirs, files in os.walk("posts"):
+    for path, subdirs, files in os.walk(split_output_path):
         for name in files:
             # don't consider non-jsonl files
             if name[-5:] != "jsonl":
                 continue
 
             # load as dictionary, remove redundancies, and sort by post number
-            with open(f"posts/{name}") as posts_file:
+            with open(f"{split_output_path}{name}") as posts_file:
                 gameposts = [
                     dict(t)
                     for t in {
@@ -123,5 +118,5 @@ if __name__ == "__main__":
                 )
 
             # save result
-            with open(f"posts/{name}", "w") as f:
+            with open(f"{split_output_path}{name}", "w") as f:
                 f.write("\n".join([json.dumps(post) for post in gameposts]))
