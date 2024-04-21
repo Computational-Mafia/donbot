@@ -2,17 +2,13 @@ name: donbot
 channels:
   - defaults
 dependencies:
-  - python<3.12
-  - ipykernel=6.28.0
-  - lxml=4.9.3
+  - python
+  - ipykernel
+  - lxml
   - pip
-  - numpy=1.26.2
-  - numba=0.58.1
-  - intel-cmplr-lib-rt
-  - pyyaml
-  - h5py
   - pytest
   - requests
-  - markdown2
+  - tqdm
+  - scrapy
   - editdistance
   - pyenchant
