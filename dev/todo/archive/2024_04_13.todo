@@ -1,0 +1,59 @@
+Key problem is that I want exhaustive test cases for the votecounter, but am finding it pretty time-consuming to recapitulate all the possible scenarios.
+
+Current approach?
+I hit an error. 
+I visually compare the votelog against the actual votes to see what went wrong.
+I extract the offending post into a new test case.
+Then I fix the bug and run the test again.
+
+How can I accelerate this process?
+It's probably the process of identifying the offending post that is the most time-consuming.
+Then I manually create a new test case for it. Perhaps I could automate this process?
+That would involve a bit of metaprogramming; not sure if it's worth it.
+
+Maybe a collection of watch variables are enough. 
+I think actually the thing that would help most is an improvement over the votelog that allows me to directly compare moderator-posted votecounts against system-generated votecounts.
+
+And also, of course, to efficiently jump to specific votes to see if they really happened.
+
+Ah, I think I have a nice strategy: raising an error when a "confident" match can't be found. 
+Then I can just look at the error message to see what went wrong. 
+And the debugger will stop at the offending post, allowing me to work at the exact point of failure, instead of the delayed signal (failed prediction) that I'm currently using.
+
+There will be some cases where my parser makes a confident match that is incorrect; my delayed signal approach will still catch these.
+
+Problem is that we're interested in rejecting all possible matches in some cases, such as when someone votes for a deadline extension. 
+This approach will flag these as errors, but they're not really errors.
+Maybe what I actually want is a conditional breakpoint for when I am debugging the votecounter.
+I guess...But then I'm losing the potential information in phases where the downstream prediction is correct but a vote is matched incorrectly.
+
+Maybe the trick is to implement two sets of tests, one that raises an error when a confident match can't be found, and one that doesn't.
+
+Perfect! I'm already catching bugs in games I previously thought were bug-free.
+Or am I?
+Hmm.
+
+Next task...figure the distances metric into the substring matching functions.
+Current implemetnation is not robust enough to multi-word player names.
+
+Next task...take same measures in other direction.
+I could just remove whitespace before doing the check, but I'd rather resolve by distance check. This will anticipate misspellings where the error is not an excluded space.
+Will require some refactoring of the distance method to be clean.
+
+This is still too slow. I think it's because I'm updating the codebase using only a single test case. I do the work to make my code pass the test, but the implementation is often not general enough to pass other test cases.
+
+I can anticipate test cases myself pretty readily. And in fact, I already have detailed documentation of errors in my other repository. Maybe I should go ahead and implement those test cases.
+
+Hmm, but it's hard to tell how niche these are.
+What's the end goal here?
+
+Every failure to either predict a phase outcome or match a vote is a potential bug and has to be visually inspected.
+But if I can fix groups of bugs before inspecting, I can save time.
+I certainly will not be able to fix every failure of the votecounter.
+So when do I stop?
+When every parsing failure and prediction error is either fixed or documented and attempted to be fixed.
+But also every hypothetical failure I can devise by reflecting on the codebase.
+That's ridiculous though, right?
+And what do I gain for this effort?
+A voting dataset that is close to accurate and complete, and the ability to grow it reasonably efficiently in the future.
+I guess...

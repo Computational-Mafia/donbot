@@ -1,0 +1,74 @@
+This is still too slow. I think it's because I'm updating the codebase using only a single test case. I do the work to make my code pass the test, but the implementation is often not general enough to pass other test cases.
+
+I can anticipate test cases myself pretty readily. And in fact, I already have detailed documentation of errors in my other repository. Maybe I should go ahead and implement those test cases.
+
+Hmm, but it's hard to tell how niche these are.
+What's the end goal here?
+
+Every failure to either predict a phase outcome or match a vote is a potential bug and has to be visually inspected.
+But if I can fix groups of bugs before inspecting, I can save time.
+I certainly will not be able to fix every failure of the votecounter.
+So when do I stop?
+When every parsing failure and prediction error is either fixed or documented and attempted to be fixed.
+But also every hypothetical failure I can devise by reflecting on the codebase.
+That's ridiculous though, right?
+And what do I gain for this effort?
+A voting dataset that is close to accurate and complete, and the ability to grow it reasonably efficiently in the future.
+I guess...
+
+Let's try to categorize based on previous progress. 
+This can identify the most common types of errors and help me prioritize test cases.
+
+- No lynches. No lynch votes are uncommon but important. Users sometimes use NL as a shorthand. However, actual No Lynch outcomes are rare, and I might exclude these from downstream analyses anyway. So lower priority.
+
+- Bugged vote tags. Controversial. Relatively rare. Players usually correct broken tags in successive posts. Some mods don't even count these. It's helpful if I can, but this is relatively lower priority too because it's not a common error and tends not to affect phase outcomes.
+
+- Genuinely ambiguous votes. Also tend to be rare, mod ignored, player corrected. These have to be documented for a complete dataset, but should not be over-emphasized during coding.
+
+- Aliases, relational naming. This is a somewhat common kind of error that in principle cannot be handled without world knowledge. I should make sure that when I start manually labeling votes for the dataset, instead of just marking single votes, I store a set of aliases for each player. This will make sure similar posts are correctly attributed to the same player without repeated manual intervention.
+
+- Misspellings. Definitely pretty common, even in combination with other errors/shortcuts. Top priority is definitely to catch these while not being so overzealous that I create false positives.
+
+- Different moderator policies. Some moderators will reject any vote that doesn't perfectly name a player. Other moderators will accept votes that require outside context to interpret. And many cases in the middle. When discrepancies are common, I should implement some sort of parameter that allows me to switch between these modes. When discrepancies are uncommon, I can exclude the moderator's game from the dataset.
+
+- Acronyms. Users often use acronyms to abbreviate player names. This is frequent enough that I can't ignore it and that manual aliasing would be a tedious and leaky solution for. I should implement a system that predicts player names from acronyms based on features like punctuation and plausible segmentations of player names into words.
+
+- Misspelled acronyms. Users often misspell acronyms. This is a common error that I should prioritize. I'll have to combine the acronym prediction system with a fuzzy matching system that can handle misspellings while not being too overzealous.
+
+- Mix of acronyms and substrings. Users might abbreviate parts of a playername while more fully typing out other parts. This is a common error that I should prioritize. I'll have to combine the acronym prediction system with a fuzzy matching system that can handle this while not being too overzealous.
+
+- Name-contains-vote substring matches. Sometimes users abbreviate a player's name by using a substring of the name. This is very common and I should prioritize it.
+
+- Vote-contains-name substring matches. Sometimes users communicate a lot in a vote tag besides name of the player they're voting. They might say they're voting for a player and then explain why without leaving the vote tag. This is common and I should prioritize it.
+
+- Combined Name-contains-vote substring and vote-contains-name substring matches. Players communicating a lot inside a vote tag and abbreviating the target player's name.
+
+- Combined substring and misspelling errors. Players abbreviating a player's name and misspelling it at the same time. Or players typing a lot inside vote tags and misspelling the target player's name.
+
+- Overeager (or undereager) matching. If I'm not careful, I might match a vote tag to a player name that is not the target of the vote. This is a common error and I should prioritize it. It is better to flag a vote for manual inspection than to incorrectly predict the target of the vote, even if it means more work for me. Solution is usually to look for ways extra conditions can be added to application of a fuzzy rule to distinguish ambiguous cases. Ordering rule application so that the most reliable rules are applied first can also help.
+
+- Nested tags. Players sometimes use fonts or other tags along with standard vote tags. I should make sure that nested tags don't interfere with vote parsing. This is a common error and I should prioritize it.
+
+- Use of bold tags for other purposes while still using the word "vote" and a player name. This may not be a common error, but is an obvious adversarial case that I should prioritize. Or maybe I should just actively accept that handling adversarial cases is out of scope for this project. I should at least document this case and make sure that the system is not too vulnerable to it.
+
+Anyway, what now? 
+Apply an optimal foraging technique: search for new test cases in the data until incremental cost of finding a new test case is greater than the incremental benefit of addressing it. Then address a test case. Repeat.
+
+
+Based on principle of diminishing returns, continually review prioritization between three tasks:
+    - Searching for new test cases
+    - Implementing fixes for test cases
+    - Automating test case detection, generation, fixing
+    - Adding label-based fixes to the archive to avoid encountering errors that I can't fix yet
+
+I definitely need to re-scrape the data. Bold tags might be different. Very important.
+
+Next, revisit old tests that care about vote parsing. 
+
+Maybe separate tests for vote detection and vote matching. Could simplify the list of test cases.
+
+Anyway, not now, right?
+
+By 3am, let's refactor the tests. 
+At minimum, let's separate the tests for vote detection and vote matching.
+Okay, done. 

@@ -8,6 +8,7 @@ reglower = re.compile('[^a-z]') # any character that IS NOT a-z
 
 tag_paths = [
     "/html/body/span[contains(@class, '{}')]",
+    "/html/body/div[contains(@style, '{}')]",
 ]
 
 
@@ -19,10 +20,20 @@ def find_noboldsig_elements(post_html: HtmlElement):
     return elements
 
 
+def find_style_bold_elements(post_html: HtmlElement):
+    "Identify post content enclosed in style bold HTML tags"
+    elements = []
+    for path in tag_paths:
+        elements.extend(post_html.xpath(path.format("font-weight:bold")))
+    return elements
+
+
 def find_bbvote_elements(post_html: HtmlElement):
     "Identify post content enclosed in vote HTML tags"
-    bbvote_tag_paths = [path.format("bbvote") for path in tag_paths]
-    return sum((post_html.xpath(path) for path in bbvote_tag_paths), [])
+    elements = []
+    for path in tag_paths:
+        elements.extend(post_html.xpath(path.format("bbvote")))
+    return elements
 
 
 def find_broken_tag_elements(post_html: HtmlElement):
@@ -30,10 +41,11 @@ def find_broken_tag_elements(post_html: HtmlElement):
     return []
 
 
-def find_votes(post_html: HtmlElement):
+def find_votes(post_html: HtmlElement) -> Iterable[str]:
     "Extract text identifying the voted player from the content of a vote"
     matched_elements = (
         find_noboldsig_elements(post_html)
+        + find_style_bold_elements(post_html)
         + find_broken_tag_elements(post_html)
         + find_bbvote_elements(post_html)
     )
@@ -121,4 +133,3 @@ class VoteParser:
             if len(substring_matches) > 2:
                 return ""
         return substring_matches[-1]
-            

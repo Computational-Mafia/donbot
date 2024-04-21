@@ -14,7 +14,7 @@ def test_phase_dataset():
     dataset = PhaseDataset(archive_path, transitions_path, posts_path)
     phase = dataset[1]
     assert phase["correct"] == ["Substrike22"]
-    assert phase["posts"][0]["number"] == "470"
+    assert phase["posts"][0]["number"] == 470
 
 
 @pytest.mark.parametrize("data_index", data_indices, ids=data_labels)

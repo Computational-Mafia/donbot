@@ -46,6 +46,16 @@ class Post:
         """Returns the post as a dictionary.
         """
         return asdict(self)
+    
+def string_to_html(string: str|bytes) -> HtmlElement:
+    """Returns an HTML element from a string, ensuring a complete document before parsing.
+
+    Args:
+        string: The string to convert to an HTML element.
+    """
+    if string[:6] != "<html>":
+        string = f"<html><body>{string}</body></html>"
+    return html.fromstring(string)
 
 
 def load_credentials(credentials_path: str = "credentials.json") -> tuple[str, str]:

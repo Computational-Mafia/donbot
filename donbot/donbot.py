@@ -9,9 +9,9 @@ from .operations import (
     get_edit_post_form,
     get_send_pm_form,
     get_thread_page_urls,
+    string_to_html,
     Post
 )
-from lxml import html
 from requests import Session
 import time
 
@@ -60,7 +60,7 @@ class Donbot:
         """
         start_url = "https://forum.mafiascum.net/index.php"
         login_url = "https://forum.mafiascum.net/ucp.php?mode=login"
-        login_page_html = html.fromstring(self.session.get(start_url).content)
+        login_page_html = string_to_html(self.session.get(start_url).content)
         time.sleep(post_delay)
         login_form = make_login_form(login_page_html, username, password)
         self.session.post(login_url, data=login_form, headers={"Referer": start_url})
@@ -74,7 +74,7 @@ class Donbot:
         thread = thread or self.thread
         if len(thread) == 0:
             raise ValueError("No thread specified!")
-        thread_html = html.fromstring(self.session.get(thread).content)
+        thread_html = string_to_html(self.session.get(thread).content)
         return count_posts(thread_html)
 
     def get_user_id(self, username: Optional[str]) -> str:
@@ -89,7 +89,7 @@ class Donbot:
 
         username = username.replace(" ", "+")
         user_url = f"https://forum.mafiascum.net/search.php?keywords=&terms=all&author={username}"
-        user_posts_html = html.fromstring(self.session.get(user_url).content)
+        user_posts_html = string_to_html(self.session.get(user_url).content)
         return get_user_id(user_posts_html)
 
     def get_activity_overview(self, thread: Optional[str] = None) -> list:
@@ -102,7 +102,7 @@ class Donbot:
         if len(thread) == 0:
             raise ValueError("No thread specified!")
         thread_number = thread[thread.rfind("=") + 1 :]
-        activity_overview_html = html.fromstring(
+        activity_overview_html = string_to_html(
             self.session.get(
                 f"https://forum.mafiascum.net/app.php/activity_overview/{thread_number}"
             ).content
@@ -122,11 +122,11 @@ class Donbot:
         thread = thread or self.thread
         if len(thread) == 0:
             raise ValueError("No thread specified!")
-        base_html = html.fromstring(self.session.get(thread).content)
+        base_html = string_to_html(self.session.get(thread).content)
 
         posts = []
         for thread_page_url in get_thread_page_urls(thread, base_html, start, end):
-            thread_page_html = html.fromstring(
+            thread_page_html = string_to_html(
                 self.session.get(thread_page_url).content
             )
             posts += get_posts(thread_page_html, start, end)
@@ -153,11 +153,11 @@ class Donbot:
             raise ValueError("No thread specified!")
         user_id = self.get_user_id(user)
         user_iso_url = f"{thread}&ppp=25&user_select%5B%5D={user_id}"
-        base_html = html.fromstring(self.session.get(user_iso_url).content)
+        base_html = string_to_html(self.session.get(user_iso_url).content)
 
         posts = []
         for user_iso_page_url in get_thread_page_urls(user_iso_url, base_html, 0, -1):
-            user_iso_page_html = html.fromstring(
+            user_iso_page_html = string_to_html(
                 self.session.get(user_iso_page_url).content
             )
             posts += get_posts(user_iso_page_html)
@@ -197,7 +197,7 @@ class Donbot:
         make_post_url = (
             f"https://forum.mafiascum.net/posting.php?mode=reply&t={thread_id}"
         )
-        make_post_page_html = html.fromstring(self.session.get(make_post_url).content)
+        make_post_page_html = string_to_html(self.session.get(make_post_url).content)
         make_post_form = make_submit_post_form(make_post_page_html, content)
         time.sleep(post_delay)
         self.session.post(make_post_url, data=make_post_form)
@@ -224,7 +224,7 @@ class Donbot:
 
         post_id = self.get_post(post_number, thread).id
         edit_post_url = f"https://forum.mafiascum.net/posting.php?mode=edit&p={post_id}"
-        edit_post_page_html = html.fromstring(self.session.get(edit_post_url).content)
+        edit_post_page_html = string_to_html(self.session.get(edit_post_url).content)
         edit_post_form = get_edit_post_form(edit_post_page_html, content)
         time.sleep(post_delay)
         self.session.post(edit_post_url, data=edit_post_form)
@@ -248,7 +248,7 @@ class Donbot:
         recipients = recipients if isinstance(recipients, list) else [recipients]
         recipient_uids = [self.get_user_id(recipient) for recipient in recipients]
         pm_url = "https://forum.mafiascum.net/ucp.php?i=pm&mode=compose"
-        pm_page_html = html.fromstring(self.session.get(pm_url).content)
+        pm_page_html = string_to_html(self.session.get(pm_url).content)
         send_pm_form = get_send_pm_form(pm_page_html, recipient_uids, content, subject)
         time.sleep(post_delay)
         self.session.post(pm_url, data=send_pm_form)

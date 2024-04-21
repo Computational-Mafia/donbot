@@ -1,0 +1,171 @@
+Ok, so I want to move relevant tests, make sure they contact actual posts in the forum, and focus them on testing for successful detection of votes rather than identification of the target.
+
+✔ Move tests for vote detection to test_find_votes.py @done(24-04-19 05:11)
+✔ Update tests in test_find_votes to minimally detect votes rather than identify the target @done(24-04-19 05:11)
+✔ Update tests to use more typical HTML from current forum posts @done(24-04-19 05:11)
+✔ Run tests @done(24-04-19 05:11)
+✘ Make them pass @cancelled(24-04-19 05:11)
+✔ Update tests in test_vote_parser to focus on tests for find_voted, side-stepping the need to test for vote detection @done(24-04-19 05:11)
+
+Hmm, but test cases seem related. Or at least, like I'll use the same inputs for both.
+
+Is this really the case?
+No -- find_voted is currently applied to outputs from find_votes.
+This means I have a parallel desire to refactor tests of find_voted to directly test for target identification rather than vote detection.
+
+Is this safe? 
+It implies that integration tests will be focused to my data-driven pipeline.
+
+Yeah, that's probably okay.
+
+I'll mark threads with reference post numbers even if I modify the actual test cases.
+
+I'll do one test at a time, actually.
+
+✔ Make my own alternative to html.from_string that ensures strings are complete HTML documents before parsing @done(24-04-19 04:29)
+✔ Update uses of html.from_string to use my own alternative @done(24-04-19 05:11)
+✘ Probably re-run game scraping to reflect changes to get_posts and related functions @cancelled(24-04-19 08:44)
+
+test_find_votes is now the correct size, but test_find_voted is still too large. 
+How should I split it up?
+
+Probably by the matching method.
+I should still not directly apply the matching method since they interact with each other in the pipeline.
+But files like "test_match_by_distance.py" and "match_by_substring.py" do a good job of collecting related tests together under a single semantic umbrella.
+
+Do I do this now?
+Sure, I want to be back in the meat of things the next time I visit this.
+
+Current problem-based separation of concerns:
+
+    Detecting vote tags:
+        - tag diversity
+        - tag nesting
+            t=16852, p=803
+        - broken/misspelled tags
+            Controversial: some mods will reject votes with broken tags, others will accept them.
+            Example: t=17276, p=1150
+        - Multiple tags in one post
+    
+    Matching votes to a voted player:
+        - Handling when votes are not for players (e.g., to signal requests, highlight content, joke, etc., or just mistaken about available options)
+            t=18952, p=1602 
+        - Accounting for no lynch votes
+            t=17864, p=1503
+        - Handling misspellings
+        - Detecting where vote contains substrings of the voted playername
+        - Detecting voted playername in a tag containing a lot of other text
+            t=16769, p=489
+        - Above could even contain other playernames, or uses of the word "vote" that have to be adjudicated 
+            t=15934, p=477
+        - Detecting acronyms where voted is indicated by initial letter(s) of name components
+        - Handling delay between "vote" and naming of vote target
+    
+    Then there's mixture cases. All of these can occur together in one post making a vote:
+        - Vote tags can be nested inside other valid tags (e.g., area).
+        - Vote tags can be broken.
+        - Then the content can contain lots of text.
+        - Then the voted player's name can be abbreviated using a combination of acronym and substring strategies for each name segment.
+        - Some name components may not be indicated at all.
+        - Abbreviations for indicated components can themselevs be misspelled.
+
+    If I can handle all the above, I'll have a pretty robust votecounter, aside from: 
+        - Vote by nickname or other alias not inferrable from playername. 
+            t=61070, p=2479
+            Can be based on avatar, real name, personal traits, etc.
+        - Parametrizable moderator policy variation
+            - About tag acceptance
+                Some mods will even accept absence of tags, wild
+            - About bold tags vs vote tags
+            - About hammer thresholds
+            - About ambiguous matches
+                t=18952 p=1164 whisker voted "Mi--" which might refer to Mist Beauty but was not counted.
+                Sometimes mods require perfect matches
+            - About votes being on their own line
+            - About self-votes
+            - Votes naming replaced players in active slots
+        - Even then, moderators frequently miss votes or imagine votes that aren't there.
+
+    Some matching or detection issues I'll miss even after above:
+        - Vote by reference.
+            t=48071, p=306
+        - Vote by string character shuffling. E.g., "VOTE: Scott" -> "VOTE: Tosct"
+        - Use of tags or "vote" within bold tags but not to indicate a vote
+            t=22900, p=560 (a "vigvote")
+        - Stylization of tags where "vote" is deliberately replaced with something else
+            t=18952, p=1614
+        - Use of ampersands and other special characters for abbreviation
+            t=28649, p=1111 but this is maybe addressable by a good acronym strategy
+        - Broken quote tags that contain votes
+            t=33249, p=1565
+            This is challenging even for a conservative parser without a really specific fix.
+        - Distortion of playernames, usually deliberate
+            t=62181, p=1931
+        - Pass as a term for no lynch and other conventions (maybe a kind of aliasing?)
+            t=62781, p=1663
+
+    More speculative issues I'd like to catch:
+        - Whitespace or other non-alphabetic characters interspersed in voted playername or abbreviations thereof.
+        - "Hammer" instead of "vote" also relevant
+        - Names kind of matchable to key words, like "count", "hammer", "deadline extension", "no lynch". We have to be able to flexibly flag these as potential votes.
+        - Short usernames or acronyms messing with distance thresholds
+        - Adversarial/deliberately confusing votes
+
+
+Wake-up calls:
+    - Any eager vote parsing strategy will sometimes miss votes or misinterpret them.
+    - The more aggressive the strategy, the more likely it is to misinterpret votes without flagging them for manual correction.
+    - The less aggressive the strategy, the more likely it is to require manual coding.
+    - Moderators frequently miss votes or imagine votes that aren't there, so validation and manual correction will always be necessary.
+    - Handling most common mixture cases and ensuring correct prediction of phase outcomes will still result in a lot of false positives and negatives in practice.
+    - Handling most common mixture cases will still leave out a lot of edge cases that would be challenging to even reliably flag but that a normal user would expect to be handled
+    - Key conclusion: perfect vote parsing and data quality is impossible, and votecounting can never be fully automated or even relied on to flag all potential votes.
+    - So the key question: what are the goals for my votecounter? When will I be satisfied with it? What are the most important use cases to handle? What kinds of errors or gaps am I willling ot accept? How will I build my votes dataset in light of the problem domain?
+
+My top priority is building a high quality dataset of voting data across a large pool of games. 
+This means I deal with a lot of pressure to avoid manual parsing of large classes of votes, and at the same time can afford to miss a lot of edge cases that would be challenging to even reliably flag but that a normal user would expect to be handled.
+In addition, I have the liberty to ignore games that are too challenging to parse, or to manually correct them.
+
+If my top priority were to provide a tool to completely automate votecounting in live games, it would be more important to handle edge cases and to avoid false positives and negatives, and to flag any opportunities for miscounting for manual correction.
+
+That said, opportunities for miscounting are also important test cases for my votecounter, and can signal deficiencies in my voting dataset.
+Along with identifying these cases so I can use them for testing and development, I should also be able to measure how important handling them is to my dataset quality (and size).
+
+I should maybe focus on a strategy of sufficiency in my development where I define a threshold number of games I need for my dataset plus a threshold degree of confidence in my votecounter's performance.
+But will need to reflect on how I can measure this confidence and how I can measure the quality of my dataset.
+
+On the one hand, I have some solid validation techniques for revealing when my votecounter is failing.
+First, across all games that could potentially be included in my dataset, I have the outcomes of each voting phase recorded. 
+I can apply my votecounter to each of these voting phases and compare the results to the recorded outcomes, flagging any discrepancies.
+Second, by applying my votecounter to all potential games, I can flag any posts where a vote is detected, but the target is not identified with high confidence.
+Across games, I can tabulate the proportion of phase outcomes that are correctly predicted, and the proportion of votes that are confidently identified.
+Perfect scores on either metric do not guarantee a perfect votecounter or voting dataset, as predicting phase outcomes doesn't necessarily require that all votes in a phase are correctly identified, and votes can be confidently matched without being correct.
+But these metrics will give me a good sense of how well my votecounter is performing and how well my dataset is constructed.
+How do I use them to define sufficiency?
+
+They will sometimes fail to catch potential errors, but still identify a lot of them.
+
+245 large normals
+2314 mini normals
+875 opens
+2119 newbie games
+1091 micro games
+
+I have 6544 games to work with or whatever.
+Estimating a proportoin across this many games with a margin of error of 5% at a 95% confidence interval would maybe require around 400 games.
+I'll indeed aim for like 500 games to have a round number to work with; I believe I can achieve many more than this depending on the success of my pipeline.
+
+Okay, let's say I'll aim for a solid voting dataset over at least 500 games. 
+Obviously, I'll reject any games I can't successfully predict phase outcomes for.
+I'll also reject any games where I can't confidently identify votes.
+But the trouble is the votes these procedures don't flag. 
+If only 10% of my 5000+ games qualify for inclusion in my dataset by these standards, then there's probably a substantial problem in my votecounter that may still interfere with the quality of the dataset I do build.
+I imagine that my measure of confidence in my votecounter should consider what ratio of phase outcoomes and votes I can't confidently identify across the *entire population* of games I could include in my dataset.
+Maybe I'll aim for 80% of phase outcomes correctly predicted and 80% of votes confidently identified across all games.
+At the same time, I'll implement tests of my votecounter's correctness over common edge cases and miscounting opportunities, and I'll use these to refine my votecounter and dataset.
+
+Ultimately means I need to scrape more games. The 300ish I have is not enough to validate my votecounter, or to build a dataset of sufficient quality.
+But first, I'll handle the tests I plan now, as they define a reasonable scope for my votecounter.
+I'll similarly aim for an 80% success rate in these tests, and I'll use them to refine my votecounter and dataset.
+
+An additional task will probably involve improve data management and the way I annotate aliases and manual corrections to votes.
