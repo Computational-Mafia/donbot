@@ -4,6 +4,7 @@ Library features:
     - Use pprint inside URL to make scraping more efficient
     - parse_votes is still pretty immature
     - Add vote counting operation to Donbot class
+    - Raise error when login fails
 
 Use cases to support:
     - Votecounting
