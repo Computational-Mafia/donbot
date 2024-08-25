@@ -58,3 +58,12 @@ def test_vote_contains_abbreviated_playername_with_spaces():
         "Scott Brosius' Slot"
     )
     assert "Scott Brosius" == vote
+
+
+def test_vote_():
+
+    players = ['EmpTyger', 'Nul', 'Substrike22', 'Llamarble', 'Pinewolf', 'Amor', 'Scott Brosius', 'Internet Stranger', 'themanhimself', 'Guderian', 'RobCapone', 'Shattered Viewpoint', 'chkflip', 'WeirdRa', 'brokenscraps', 'Kingcheese']
+    vote = VoteParser(players, flag_unmatched_votes=True).find_voted(
+        'TheManHimself L - 1'
+    )
+    assert "themanhimself" == vote

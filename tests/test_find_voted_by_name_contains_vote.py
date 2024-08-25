@@ -21,3 +21,8 @@ def test_match_vote_is_misspelled_substring_of_player():
     ]
     voted = VoteParser(players, flag_unmatched_votes=True).find_voted("ScottBro")
     assert voted == "Scott Brosius"
+
+def test_match():
+    players = ['Substrike22', 'Antihero', 'Lateralus22', 'caelum', 'boberz', 'Mariyta', 'AntB', 'pappums rat', 'Mr Wright', 'Ant_to_the_max', 'Dekes', 'Empking', 'Xtoxm', 'moose200x']
+    voted = VoteParser(players, flag_unmatched_votes=True).find_voted("Rat")
+    assert voted == 'pappums rat'

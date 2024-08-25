@@ -1,0 +1,40 @@
+So current strategy?:
+    ☐ Define a range of capacities for the votecounter to support.
+    ☐ Each defined capacity gets its own test file containing a set of test cases that specify the capacity and the kinds of votes that the capacity needs to address.
+    ☐ Make votecounter pass the tests.
+    ☐ Measure ability of the updated votecounter to predict phase outcomes and votes across dataset.
+    ☐ Decide if I am satisfied with the votecounter's performance or need either new test cases or new capacities.
+    ☐ If not, select new capacities or test cases and repeat the process.
+
+I have capacities to address:
+    - Complicated vote tag parsing
+    - Mispellings
+    - Vote-in-playername substrings (shortenings, etc.)
+    - Playername-in-vote substrings (e.g. "I vote for playername")
+    - Acronyms (first letter of unit, e.g. "I vote for PN")
+    - Mixtures of the above (e.g., "I vote for playername" with a misspelling)
+    - Flagging all potential false positives outside these categories
+
+All of these can occur together in one post making a vote:
+    - Vote tags can be nested inside other valid tags (e.g., area).
+    - Vote tags can be broken.
+    - Then the content can contain lots of text.
+    - Then the voted player's name can be abbreviated using a combination of acronym and substring strategies for each name segment.
+    - Some name components may not be indicated at all.
+    - Abbreviations for indicated components can themselves be misspelled.
+
+I also have some initial test cases, but I know these to be incomplete. 
+I will need to add more test cases as I go along, before worrying about performance on the dataset.
+Let's try implementing a basic example across each of these capacities and then all possible combinations of the capacities.
+Then I'll make the votecounter work on these test cases.
+
+Tonight...I think I'll finally get a working implementation of english_divides.
+
+Games that will get flagged given current capacities:
+    ✘ 1094, D1. "dramonerx" @cancelled(24-04-24 04:11)
+    - 1098 D2. 'ON SOMEBODY WHO NOBODY CAN MAKE A CASE FOR. FAILURE TO BE ABLE TO MAKE A CASE ON SOMEBODY IS SCUMMY PLAY SO MAKE A CASE'
+
+Next set of matching strategies:
+    Will take real effort to address neatly with other abbreviation strategies.
+    - capitalization as a acronym cue
+    - spaces as a acronym cue

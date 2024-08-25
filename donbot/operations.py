@@ -174,7 +174,7 @@ def get_post(post_html: HtmlElement, page_url: str = '') -> Post:  # sourcery sk
         post_html: The HTML of a post.
         page_url: The URL of the page containing the post.
     """
-    post_number_path = ".//span[@class='post-number-bolded']//text()"
+    post_number_path = ".//span[contains(@class, 'post-number-bolded')]//text()"
     post_user_path = ".//a[@class='username' or @class='username-coloured']/text()"
     post_user_id_path = ".//a[@class='username' or @class='username-coloured']/@href"
     post_content_path = ".//div[@class='content']"

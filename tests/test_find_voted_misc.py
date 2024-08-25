@@ -34,5 +34,3 @@ def test_match_dramonerx_to_reckamonic():
     ]
     voted = VoteParser(players, flag_unmatched_votes=True).find_voted("Dramonerx")
     assert voted == "Reckamonic"
-
-

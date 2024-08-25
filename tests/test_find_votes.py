@@ -61,6 +61,22 @@ def test_ignore_bolded_directive_not_to_vote():
     assert not votes
 
 
+def test_ignore_bolded_discussion_of_votes():
+    post_content = (
+        '<div style="display:inline;color:#0000FF"><div style="font-size: 75%; line-height: normal; display: inline"><div style="display:inline;font-weight:bold">Votecounts have been fixed. Please accept my apologies.  ~~NS</div></div></div>'
+    )
+    votes = list(find_votes(string_to_html(post_content)))
+    assert not votes
+
+
+def test_ignore_bolded_discussion_of_votes2():
+    post_content = (
+        '<div style="display:inline;font-weight:bold"><div style="display:inline;color:#800080">Due to the forum glitch, I cannot edit the first post. I will, however, include the player list in each vote count post for now on. Sorry about that.</div></div>'
+    )
+    votes = list(find_votes(string_to_html(post_content)))
+    assert not votes
+
+
 def test_dont_ignore_bold_vote_inside_area_tags():
     post_content = '<fieldset style="border:3px outset grey;padding:5px 10px"><div style="display:inline;font-weight:bold">vote Psyche</div></fieldset>'
     votes = list(find_votes(string_to_html(post_content)))

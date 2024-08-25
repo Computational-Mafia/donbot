@@ -97,6 +97,7 @@ def test_unmatch_flagged_vote_extraction(data_index):
         elif not transition_start:
             if post["user"] in phase["moderators"]:
                 transition_start = int(post["number"])
+                transition_end = int(post["number"])
         elif post["user"] in phase["moderators"]:
             transition_end = int(post["number"])
         else:
