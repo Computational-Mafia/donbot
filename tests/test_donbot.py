@@ -1,6 +1,5 @@
 from donbot import Donbot
 from donbot.operations import load_credentials
-import random
 
 single_page_thread = "https://forum.mafiascum.net/viewtopic.php?f=53&t=84030"
 multi_page_thread = "https://forum.mafiascum.net/viewtopic.php?t=83530"

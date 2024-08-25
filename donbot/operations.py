@@ -53,8 +53,8 @@ def string_to_html(string: str|bytes) -> HtmlElement:
     Args:
         string: The string to convert to an HTML element.
     """
-    if string[:6] != "<html>":
-        string = f"<html><body>{string}</body></html>"
+    # if string[:6] != "<html>":
+    #     string = f"<html><body>{string}</body></html>"
     return html.fromstring(string)
 
 
