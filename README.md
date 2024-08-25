@@ -20,10 +20,10 @@ Using donbot, we've already automated a number of common workflows on mafiascum.
 
 ## Using the Library 🍲
 
-Donbot is available on PyPI, so you can install it with pip:
+Donbot is available on PyPI as `donbot-python`, but it's around as easy to just pip install from the repo:
 
 ```bash
-pip install donbot-python
+pip install git+https://github.com/Computational-Mafia/donbot.git@master
 ```
 
 For most developers, it's most easy to get started by importing the `Donbot` class and initializing it with your account credentials -- ideally in a more secure way than hardcoding them into your script. You can either specify the thread you want to interact with when you initialize the bot (ideal when it's just that one thread), or specify it later when you call a function that requires it.
